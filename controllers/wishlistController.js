@@ -1,6 +1,6 @@
 const Wishlist = require('../models/whishlist');
 const Item = require('../models/item');
-const { successResponse, errorResponse } = require('../utils/apiResponse');
+const { apiResponse } = require('../utils/apiResponse');
 
 // Get user's wishlist
 const getUserWishlist = async (req, res) => {
@@ -17,7 +17,7 @@ const getUserWishlist = async (req, res) => {
       const newWishlist = await Wishlist.getOrCreateWishlist(userId);
       console.log('New wishlist created:', newWishlist._id);
       
-      return res.json(successResponse('Wishlist retrieved successfully', {
+      return res.json(apiResponse(200, true, 'Wishlist retrieved successfully', {
         wishlist: newWishlist,
         itemCount: 0,
         items: []
@@ -29,7 +29,7 @@ const getUserWishlist = async (req, res) => {
     // Filter out inactive items
     const activeItems = wishlist.items.filter(wishlistItem => wishlistItem.item);
     
-    res.json(successResponse('Wishlist retrieved successfully', {
+    res.json(apiResponse(200, true, 'Wishlist retrieved successfully', {
       wishlist: wishlist,
       itemCount: activeItems.length,
       items: activeItems
@@ -37,7 +37,7 @@ const getUserWishlist = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching user wishlist:', error);
-    res.status(500).json(errorResponse('Failed to fetch wishlist', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch wishlist', error.message));
   }
 };
 
@@ -53,7 +53,7 @@ const addToWishlist = async (req, res) => {
 
     if (!itemId) {
       console.log('Validation failed: Item ID is required');
-      return res.status(400).json(errorResponse('Item ID is required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID is required'));
     }
 
     console.log('Input validation passed');
@@ -62,12 +62,12 @@ const addToWishlist = async (req, res) => {
     const item = await Item.findById(itemId);
     if (!item) {
       console.log('Item not found:', itemId);
-      return res.status(404).json(errorResponse('Item not found'));
+      return res.status(404).json(apiResponse(404, false, 'Item not found'));
     }
 
     if (!item.isActive) {
       console.log('Item is not active:', itemId);
-      return res.status(400).json(errorResponse('Item is not available'));
+      return res.status(400).json(apiResponse(400, false, 'Item is not available'));
     }
 
     console.log('Item found and active:', item._id);
@@ -84,7 +84,7 @@ const addToWishlist = async (req, res) => {
     const updatedWishlist = await Wishlist.getWishlistWithItems(userId);
     console.log('Updated wishlist retrieved');
 
-    res.status(201).json(successResponse('Item added to wishlist successfully', {
+    res.status(201).json(apiResponse(201, true, 'Item added to wishlist successfully', {
       wishlist: updatedWishlist,
       itemCount: updatedWishlist.items.length
     }));
@@ -93,10 +93,10 @@ const addToWishlist = async (req, res) => {
     console.error('Error adding item to wishlist:', error);
     
     if (error.message === 'Item already exists in wishlist') {
-      return res.status(400).json(errorResponse('Item already exists in wishlist'));
+      return res.status(400).json(apiResponse(400, false, 'Item already exists in wishlist'));
     }
     
-    res.status(500).json(errorResponse('Failed to add item to wishlist', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to add item to wishlist', error.message));
   }
 };
 
@@ -112,7 +112,7 @@ const removeFromWishlist = async (req, res) => {
 
     if (!itemId) {
       console.log('Validation failed: Item ID is required');
-      return res.status(400).json(errorResponse('Item ID is required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID is required'));
     }
 
     console.log('Input validation passed');
@@ -121,7 +121,7 @@ const removeFromWishlist = async (req, res) => {
     
     if (!wishlist) {
       console.log('Wishlist not found for user:', userId);
-      return res.status(404).json(errorResponse('Wishlist not found'));
+      return res.status(404).json(apiResponse(404, false, 'Wishlist not found'));
     }
 
     console.log('Wishlist found:', wishlist._id);
@@ -134,14 +134,14 @@ const removeFromWishlist = async (req, res) => {
     const updatedWishlist = await Wishlist.getWishlistWithItems(userId);
     console.log('Updated wishlist retrieved');
 
-    res.json(successResponse('Item removed from wishlist successfully', {
+    res.json(apiResponse(200, true, 'Item removed from wishlist successfully', {
       wishlist: updatedWishlist,
       itemCount: updatedWishlist.items.length
     }));
 
   } catch (error) {
     console.error('Error removing item from wishlist:', error);
-    res.status(500).json(errorResponse('Failed to remove item from wishlist', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to remove item from wishlist', error.message));
   }
 };
 
@@ -159,12 +159,12 @@ const updateWishlistItemNotes = async (req, res) => {
 
     if (!itemId) {
       console.log('Validation failed: Item ID is required');
-      return res.status(400).json(errorResponse('Item ID is required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID is required'));
     }
 
     if (notes === undefined) {
       console.log('Validation failed: Notes are required');
-      return res.status(400).json(errorResponse('Notes are required'));
+      return res.status(400).json(apiResponse(400, false, 'Notes are required'));
     }
 
     console.log('Input validation passed');
@@ -173,7 +173,7 @@ const updateWishlistItemNotes = async (req, res) => {
     
     if (!wishlist) {
       console.log('Wishlist not found for user:', userId);
-      return res.status(404).json(errorResponse('Wishlist not found'));
+      return res.status(404).json(apiResponse(404, false, 'Wishlist not found'));
     }
 
     console.log('Wishlist found:', wishlist._id);
@@ -186,7 +186,7 @@ const updateWishlistItemNotes = async (req, res) => {
     const updatedWishlist = await Wishlist.getWishlistWithItems(userId);
     console.log('Updated wishlist retrieved');
 
-    res.json(successResponse('Item notes updated successfully', {
+    res.json(apiResponse(200, true, 'Item notes updated successfully', {
       wishlist: updatedWishlist
     }));
 
@@ -194,10 +194,10 @@ const updateWishlistItemNotes = async (req, res) => {
     console.error('Error updating wishlist item notes:', error);
     
     if (error.message === 'Item not found in wishlist') {
-      return res.status(404).json(errorResponse('Item not found in wishlist'));
+      return res.status(404).json(apiResponse(404, false, 'Item not found in wishlist'));
     }
     
-    res.status(500).json(errorResponse('Failed to update item notes', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update item notes', error.message));
   }
 };
 
@@ -213,7 +213,7 @@ const clearWishlist = async (req, res) => {
     
     if (!wishlist) {
       console.log('Wishlist not found for user:', userId);
-      return res.status(404).json(errorResponse('Wishlist not found'));
+      return res.status(404).json(apiResponse(404, false, 'Wishlist not found'));
     }
 
     console.log('Wishlist found:', wishlist._id);
@@ -222,14 +222,14 @@ const clearWishlist = async (req, res) => {
     await wishlist.clearWishlist();
     console.log('Wishlist cleared successfully');
 
-    res.json(successResponse('Wishlist cleared successfully', {
+    res.json(apiResponse(200, true, 'Wishlist cleared successfully', {
       wishlist: wishlist,
       itemCount: 0
     }));
 
   } catch (error) {
     console.error('Error clearing wishlist:', error);
-    res.status(500).json(errorResponse('Failed to clear wishlist', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to clear wishlist', error.message));
   }
 };
 
@@ -245,7 +245,7 @@ const checkItemInWishlist = async (req, res) => {
 
     if (!itemId) {
       console.log('Validation failed: Item ID is required');
-      return res.status(400).json(errorResponse('Item ID is required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID is required'));
     }
 
     console.log('Input validation passed');
@@ -253,14 +253,14 @@ const checkItemInWishlist = async (req, res) => {
     const isInWishlist = await Wishlist.isItemInWishlist(userId, itemId);
     console.log('Item in wishlist check result:', isInWishlist);
 
-    res.json(successResponse('Item wishlist status checked successfully', {
+    res.json(apiResponse(200, true, 'Item wishlist status checked successfully', {
       itemId: itemId,
       isInWishlist: isInWishlist
     }));
 
   } catch (error) {
     console.error('Error checking item in wishlist:', error);
-    res.status(500).json(errorResponse('Failed to check item in wishlist', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to check item in wishlist', error.message));
   }
 };
 
@@ -275,11 +275,11 @@ const getWishlistStats = async (req, res) => {
     const stats = await Wishlist.getWishlistStats(userId);
     console.log('Wishlist statistics calculated:', stats);
 
-    res.json(successResponse('Wishlist statistics retrieved successfully', stats));
+    res.json(apiResponse(200, true, 'Wishlist statistics retrieved successfully', stats));
 
   } catch (error) {
     console.error('Error getting wishlist statistics:', error);
-    res.status(500).json(errorResponse('Failed to get wishlist statistics', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to get wishlist statistics', error.message));
   }
 };
 
@@ -295,7 +295,7 @@ const toggleWishlistStatus = async (req, res) => {
     
     if (!wishlist) {
       console.log('Wishlist not found for user:', userId);
-      return res.status(404).json(errorResponse('Wishlist not found'));
+      return res.status(404).json(apiResponse(404, false, 'Wishlist not found'));
     }
 
     console.log('Wishlist found, current status:', wishlist.isActive);
@@ -304,13 +304,13 @@ const toggleWishlistStatus = async (req, res) => {
     await wishlist.toggleStatus();
     console.log('Wishlist status toggled successfully');
 
-    res.json(successResponse('Wishlist status toggled successfully', {
+    res.json(apiResponse(200, true, 'Wishlist status toggled successfully', {
       wishlist: wishlist
     }));
 
   } catch (error) {
     console.error('Error toggling wishlist status:', error);
-    res.status(500).json(errorResponse('Failed to toggle wishlist status', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to toggle wishlist status', error.message));
   }
 };
 
@@ -326,7 +326,7 @@ const moveToCart = async (req, res) => {
 
     if (!itemId) {
       console.log('Validation failed: Item ID is required');
-      return res.status(400).json(errorResponse('Item ID is required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID is required'));
     }
 
     console.log('Input validation passed');
@@ -334,13 +334,13 @@ const moveToCart = async (req, res) => {
     // TODO: Implement cart integration
     console.log('Cart integration not yet implemented');
 
-    res.json(successResponse('Move to cart functionality coming soon', {
+    res.json(apiResponse(200, true, 'Move to cart functionality coming soon', {
       message: 'This feature will be implemented with cart system'
     }));
 
   } catch (error) {
     console.error('Error moving item to cart:', error);
-    res.status(500).json(errorResponse('Failed to move item to cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to move item to cart', error.message));
   }
 };
 

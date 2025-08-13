@@ -1,5 +1,5 @@
 const GlobalFilter = require('../models/globalFilter');
-const { successResponse, errorResponse } = require('../utils/apiResponse');
+const { apiResponse } = require('../utils/apiResponse');
 
 // Create a new global filter
 const createGlobalFilter = async (req, res) => {
@@ -14,7 +14,7 @@ const createGlobalFilter = async (req, res) => {
     const existingFilter = await GlobalFilter.findOne({ key: filterData.key });
     if (existingFilter) {
       console.log('Filter with key already exists:', existingFilter._id);
-      return res.status(400).json(errorResponse('Filter with this key already exists'));
+      return res.status(400).json(apiResponse(400, false, 'Filter with this key already exists'));
     }
 
     console.log('Filter key is unique, proceeding with creation');
@@ -24,10 +24,10 @@ const createGlobalFilter = async (req, res) => {
     await globalFilter.save();
     console.log('Global filter saved successfully:', globalFilter._id);
 
-    res.status(201).json(successResponse('Global filter created successfully', globalFilter));
+    res.status(201).json(apiResponse(201, true, 'Global filter created successfully', globalFilter));
   } catch (error) {
     console.error('Error creating global filter:', error);
-    res.status(500).json(errorResponse('Failed to create global filter', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to create global filter', error.message));
   }
 };
 
@@ -67,7 +67,7 @@ const getAllGlobalFilters = async (req, res) => {
     const total = await GlobalFilter.countDocuments(query);
     console.log('Total filters count:', total);
 
-    res.json(successResponse('Global filters retrieved successfully', {
+    res.json(apiResponse(200, true, 'Global filters retrieved successfully', {
       filters,
       pagination: {
         page: options.page,
@@ -78,7 +78,7 @@ const getAllGlobalFilters = async (req, res) => {
     }));
   } catch (error) {
     console.error('Error fetching global filters:', error);
-    res.status(500).json(errorResponse('Failed to fetch global filters', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch global filters', error.message));
   }
 };
 
@@ -93,14 +93,14 @@ const getGlobalFilterById = async (req, res) => {
 
     if (!globalFilter) {
       console.log('Global filter not found:', req.params.id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found:', globalFilter._id);
-    res.json(successResponse('Global filter retrieved successfully', globalFilter));
+    res.json(apiResponse(200, true, 'Global filter retrieved successfully', globalFilter));
   } catch (error) {
     console.error('Error fetching global filter:', error);
-    res.status(500).json(errorResponse('Failed to fetch global filter', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch global filter', error.message));
   }
 };
 
@@ -115,7 +115,7 @@ const updateGlobalFilter = async (req, res) => {
     
     if (!globalFilter) {
       console.log('Global filter not found for update:', req.params.id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found for update:', globalFilter._id);
@@ -126,7 +126,7 @@ const updateGlobalFilter = async (req, res) => {
       const existingFilter = await GlobalFilter.findOne({ key: req.body.key });
       if (existingFilter) {
         console.log('Filter with new key already exists:', existingFilter._id);
-        return res.status(400).json(errorResponse('Filter with this key already exists'));
+        return res.status(400).json(apiResponse(400, false, 'Filter with this key already exists'));
       }
       console.log('New key is unique, proceeding with update');
     }
@@ -146,10 +146,10 @@ const updateGlobalFilter = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Global filter updated successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Global filter updated successfully', updatedFilter));
   } catch (error) {
     console.error('Error updating global filter:', error);
-    res.status(500).json(errorResponse('Failed to update global filter', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update global filter', error.message));
   }
 };
 
@@ -163,17 +163,17 @@ const deleteGlobalFilter = async (req, res) => {
     
     if (!globalFilter) {
       console.log('Global filter not found for deletion:', req.params.id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found for deletion:', globalFilter._id);
     await globalFilter.remove();
     console.log('Global filter deleted successfully');
     
-    res.json(successResponse('Global filter deleted successfully'));
+    res.json(apiResponse(200, true, 'Global filter deleted successfully'));
   } catch (error) {
     console.error('Error deleting global filter:', error);
-    res.status(500).json(errorResponse('Failed to delete global filter', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to delete global filter', error.message));
   }
 };
 
@@ -187,7 +187,7 @@ const toggleGlobalFilterStatus = async (req, res) => {
     
     if (!globalFilter) {
       console.log('Global filter not found for status toggle:', req.params.id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, current status:', globalFilter.isActive);
@@ -195,10 +195,10 @@ const toggleGlobalFilterStatus = async (req, res) => {
     await globalFilter.save();
     console.log('Global filter status toggled successfully');
 
-    res.json(successResponse('Global filter status toggled successfully', globalFilter));
+    res.json(apiResponse(200, true, 'Global filter status toggled successfully', globalFilter));
   } catch (error) {
     console.error('Error toggling global filter status:', error);
-    res.status(500).json(errorResponse('Failed to toggle global filter status', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to toggle global filter status', error.message));
   }
 };
 
@@ -210,10 +210,10 @@ const getActiveGlobalFilters = async (req, res) => {
     const filters = await GlobalFilter.getActiveFilters();
     console.log('Retrieved active filters count:', filters.length);
     
-    res.json(successResponse('Active global filters retrieved successfully', filters));
+    res.json(apiResponse(200, true, 'Active global filters retrieved successfully', filters));
   } catch (error) {
     console.error('Error fetching active global filters:', error);
-    res.status(500).json(errorResponse('Failed to fetch active global filters', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch active global filters', error.message));
   }
 };
 
@@ -227,10 +227,10 @@ const getGlobalFiltersByCategory = async (req, res) => {
     const filters = await GlobalFilter.getByCategory(categoryId);
     console.log('Retrieved filters by category count:', filters.length);
     
-    res.json(successResponse('Global filters by category retrieved successfully', filters));
+    res.json(apiResponse(200, true, 'Global filters by category retrieved successfully', filters));
   } catch (error) {
     console.error('Error fetching global filters by category:', error);
-    res.status(500).json(errorResponse('Failed to fetch global filters by category', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch global filters by category', error.message));
   }
 };
 
@@ -245,14 +245,14 @@ const getGlobalFilterByKey = async (req, res) => {
     
     if (!filter) {
       console.log('Global filter not found by key:', key);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found by key:', filter._id);
-    res.json(successResponse('Global filter retrieved successfully', filter));
+    res.json(apiResponse(200, true, 'Global filter retrieved successfully', filter));
   } catch (error) {
     console.error('Error fetching global filter by key:', error);
-    res.status(500).json(errorResponse('Failed to fetch global filter by key', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch global filter by key', error.message));
   }
 };
 
@@ -270,14 +270,14 @@ const getPopularValues = async (req, res) => {
     
     if (!values) {
       console.log('Global filter not found for popular values:', key);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Retrieved popular values count:', values.length);
-    res.json(successResponse('Popular values retrieved successfully', values));
+    res.json(apiResponse(200, true, 'Popular values retrieved successfully', values));
   } catch (error) {
     console.error('Error fetching popular values:', error);
-    res.status(500).json(errorResponse('Failed to fetch popular values', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch popular values', error.message));
   }
 };
 
@@ -294,7 +294,7 @@ const addValueToFilter = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for adding value:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, adding value:', value);
@@ -306,10 +306,10 @@ const addValueToFilter = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Value added to filter successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Value added to filter successfully', updatedFilter));
   } catch (error) {
     console.error('Error adding value to filter:', error);
-    res.status(500).json(errorResponse('Failed to add value to filter', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to add value to filter', error.message));
   }
 };
 
@@ -326,7 +326,7 @@ const updateFilterValue = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for updating value:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, updating value from:', oldValue, 'to:', newValue);
@@ -338,10 +338,10 @@ const updateFilterValue = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value updated successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value updated successfully', updatedFilter));
   } catch (error) {
     console.error('Error updating filter value:', error);
-    res.status(500).json(errorResponse('Failed to update filter value', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update filter value', error.message));
   }
 };
 
@@ -358,7 +358,7 @@ const removeFilterValue = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for removing value:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, removing value:', value);
@@ -370,10 +370,10 @@ const removeFilterValue = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value removed successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value removed successfully', updatedFilter));
   } catch (error) {
     console.error('Error removing filter value:', error);
-    res.status(500).json(errorResponse('Failed to remove filter value', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to remove filter value', error.message));
   }
 };
 
@@ -390,7 +390,7 @@ const toggleValueStatus = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for toggling value status:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, toggling value status:', value);
@@ -402,10 +402,10 @@ const toggleValueStatus = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value status toggled successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value status toggled successfully', updatedFilter));
   } catch (error) {
     console.error('Error toggling filter value status:', error);
-    res.status(500).json(errorResponse('Failed to toggle filter value status', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to toggle filter value status', error.message));
   }
 };
 
@@ -422,7 +422,7 @@ const updateValueCount = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for updating value count:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, updating count for value:', value, 'to:', count);
@@ -434,10 +434,10 @@ const updateValueCount = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value count updated successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value count updated successfully', updatedFilter));
   } catch (error) {
     console.error('Error updating filter value count:', error);
-    res.status(500).json(errorResponse('Failed to update filter value count', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update filter value count', error.message));
   }
 };
 
@@ -454,7 +454,7 @@ const incrementValueCount = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for incrementing value count:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, incrementing count for value:', value);
@@ -466,10 +466,10 @@ const incrementValueCount = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value count incremented successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value count incremented successfully', updatedFilter));
   } catch (error) {
     console.error('Error incrementing filter value count:', error);
-    res.status(500).json(errorResponse('Failed to increment filter value count', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to increment filter value count', error.message));
   }
 };
 
@@ -486,7 +486,7 @@ const decrementValueCount = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for decrementing value count:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, decrementing count for value:', value);
@@ -498,10 +498,10 @@ const decrementValueCount = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter value count decremented successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter value count decremented successfully', updatedFilter));
   } catch (error) {
     console.error('Error decrementing filter value count:', error);
-    res.status(500).json(errorResponse('Failed to decrement filter value count', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to decrement filter value count', error.message));
   }
 };
 
@@ -518,7 +518,7 @@ const reorderFilterValues = async (req, res) => {
     const globalFilter = await GlobalFilter.findById(id);
     if (!globalFilter) {
       console.log('Global filter not found for reordering values:', id);
-      return res.status(404).json(errorResponse('Global filter not found'));
+      return res.status(404).json(apiResponse(404, false, 'Global filter not found'));
     }
 
     console.log('Global filter found, reordering values');
@@ -530,10 +530,10 @@ const reorderFilterValues = async (req, res) => {
       .populate('category', 'name description image');
     console.log('Refreshed filter data');
 
-    res.json(successResponse('Filter values reordered successfully', updatedFilter));
+    res.json(apiResponse(200, true, 'Filter values reordered successfully', updatedFilter));
   } catch (error) {
     console.error('Error reordering filter values:', error);
-    res.status(500).json(errorResponse('Failed to reorder filter values', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to reorder filter values', error.message));
   }
 };
 
@@ -578,7 +578,7 @@ const searchGlobalFilters = async (req, res) => {
     const total = await GlobalFilter.countDocuments(query);
     console.log('Total search results:', total);
 
-    res.json(successResponse('Global filters search completed successfully', {
+    res.json(apiResponse(200, true, 'Global filters search completed successfully', {
       filters,
       pagination: {
         page: options.page,
@@ -589,7 +589,7 @@ const searchGlobalFilters = async (req, res) => {
     }));
   } catch (error) {
     console.error('Error searching global filters:', error);
-    res.status(500).json(errorResponse('Failed to search global filters', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to search global filters', error.message));
   }
 };
 

@@ -1,36 +1,33 @@
 const express = require('express');
 const router = express.Router();
+const { verifyAuth } = require('../middleware/auth');
 const wishlistController = require('../controllers/wishlistController');
-const auth = require('../middleware/auth');
-
-// Apply authentication middleware to all wishlist routes
-router.use(auth);
 
 // GET /api/wishlist - Get user's wishlist
-router.get('/', wishlistController.getUserWishlist);
+router.get('/', verifyAuth(['user']), wishlistController.getUserWishlist);
 
 // POST /api/wishlist - Add item to wishlist
-router.post('/', wishlistController.addToWishlist);
+router.post('/', verifyAuth(['user']), wishlistController.addToWishlist);
 
 // DELETE /api/wishlist/:itemId - Remove item from wishlist
-router.delete('/:itemId', wishlistController.removeFromWishlist);
+router.delete('/:itemId', verifyAuth(['user']), wishlistController.removeFromWishlist);
 
 // PUT /api/wishlist/:itemId/notes - Update item notes in wishlist
-router.put('/:itemId/notes', wishlistController.updateWishlistItemNotes);
+router.put('/:itemId/notes', verifyAuth(['user']), wishlistController.updateWishlistItemNotes);
 
 // DELETE /api/wishlist/clear - Clear entire wishlist
-router.delete('/clear', wishlistController.clearWishlist);
+router.delete('/clear', verifyAuth(['user']), wishlistController.clearWishlist);
 
 // GET /api/wishlist/:itemId/check - Check if item is in wishlist
-router.get('/:itemId/check', wishlistController.checkItemInWishlist);
+router.get('/:itemId/check', verifyAuth(['user']), wishlistController.checkItemInWishlist);
 
 // GET /api/wishlist/stats - Get wishlist statistics
-router.get('/stats', wishlistController.getWishlistStats);
+router.get('/stats', verifyAuth(['user']), wishlistController.getWishlistStats);
 
 // PATCH /api/wishlist/toggle-status - Toggle wishlist status
-router.patch('/toggle-status', wishlistController.toggleWishlistStatus);
+router.patch('/toggle-status', verifyAuth(['user']), wishlistController.toggleWishlistStatus);
 
 // POST /api/wishlist/:itemId/move-to-cart - Move item from wishlist to cart
-router.post('/:itemId/move-to-cart', wishlistController.moveToCart);
+router.post('/:itemId/move-to-cart', verifyAuth(['user']), wishlistController.moveToCart);
 
 module.exports = router;

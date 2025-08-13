@@ -1,6 +1,6 @@
 const Cart = require('../models/cart');
 const Item = require('../models/item');
-const { successResponse, errorResponse } = require('../utils/apiResponse');
+const { apiResponse } = require('../utils/apiResponse');
 
 // Get user's cart
 const getUserCart = async (req, res) => {
@@ -17,7 +17,7 @@ const getUserCart = async (req, res) => {
       const newCart = await Cart.getOrCreateCart(userId);
       console.log('New cart created:', newCart._id);
       
-      return res.json(successResponse('Cart retrieved successfully', {
+      return res.json(apiResponse(200, true, 'Cart retrieved successfully', {
         cart: newCart,
         itemCount: 0,
         items: [],
@@ -32,7 +32,7 @@ const getUserCart = async (req, res) => {
     // Filter out inactive items
     const activeItems = cart.items.filter(cartItem => cartItem.item);
     
-    res.json(successResponse('Cart retrieved successfully', {
+    res.json(apiResponse(200, true, 'Cart retrieved successfully', {
       cart: cart,
       itemCount: cart.totalItems,
       items: activeItems,
@@ -43,7 +43,7 @@ const getUserCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching user cart:', error);
-    res.status(500).json(errorResponse('Failed to fetch cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch cart', error.message));
   }
 };
 
@@ -59,17 +59,17 @@ const addToCart = async (req, res) => {
 
     if (!itemId || !quantity || !variant) {
       console.log('Validation failed: Missing required fields');
-      return res.status(400).json(errorResponse('Item ID, quantity, and variant are required'));
+      return res.status(400).json(apiResponse(400, false, 'Item ID, quantity, and variant are required'));
     }
 
     if (!variant.size || !variant.color || !variant.color.name) {
       console.log('Validation failed: Invalid variant structure');
-      return res.status(400).json(errorResponse('Variant must include size and color name'));
+      return res.status(400).json(apiResponse(400, false, 'Variant must include size and color name'));
     }
 
     if (quantity < 1 || quantity > 99) {
       console.log('Validation failed: Invalid quantity');
-      return res.status(400).json(errorResponse('Quantity must be between 1 and 99'));
+      return res.status(400).json(apiResponse(400, false, 'Quantity must be between 1 and 99'));
     }
 
     console.log('Input validation passed');
@@ -78,12 +78,12 @@ const addToCart = async (req, res) => {
     const item = await Item.findById(itemId);
     if (!item) {
       console.log('Item not found:', itemId);
-      return res.status(404).json(errorResponse('Item not found'));
+      return res.status(404).json(apiResponse(404, false, 'Item not found'));
     }
 
     if (!item.isActive) {
       console.log('Item is not active:', itemId);
-      return res.status(400).json(errorResponse('Item is not available'));
+      return res.status(400).json(apiResponse(400, false, 'Item is not available'));
     }
 
     console.log('Item found and active:', item._id);
@@ -92,19 +92,19 @@ const addToCart = async (req, res) => {
     const itemVariant = item.variants.find(v => v.size === variant.size);
     if (!itemVariant) {
       console.log('Variant size not found for item:', variant.size);
-      return res.status(400).json(errorResponse('Invalid size for this item'));
+      return res.status(400).json(apiResponse(400, false, 'Invalid size for this item'));
     }
 
     const itemColor = itemVariant.colors.find(c => c.name === variant.color.name);
     if (!itemColor) {
       console.log('Variant color not found for item:', variant.color.name);
-      return res.status(400).json(errorResponse('Invalid color for this item'));
+      return res.status(400).json(apiResponse(400, false, 'Invalid color for this item'));
     }
 
     // Check stock availability
     if (itemColor.stock < quantity) {
       console.log('Insufficient stock:', itemColor.stock, 'requested:', quantity);
-      return res.status(400).json(errorResponse('Insufficient stock available'));
+      return res.status(400).json(apiResponse(400, false, 'Insufficient stock available'));
     }
 
     console.log('Variant validation passed, stock available');
@@ -121,7 +121,7 @@ const addToCart = async (req, res) => {
     const updatedCart = await Cart.getCartWithItems(userId);
     console.log('Updated cart retrieved');
 
-    res.status(201).json(successResponse('Item added to cart successfully', {
+    res.status(201).json(apiResponse(201, true, 'Item added to cart successfully', {
       cart: updatedCart,
       itemCount: updatedCart.totalItems,
       subtotal: updatedCart.subtotal,
@@ -131,7 +131,7 @@ const addToCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error adding item to cart:', error);
-    res.status(500).json(errorResponse('Failed to add item to cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to add item to cart', error.message));
   }
 };
 
@@ -149,17 +149,17 @@ const updateCartItemQuantity = async (req, res) => {
 
     if (!quantity || !variant) {
       console.log('Validation failed: Missing required fields');
-      return res.status(400).json(errorResponse('Quantity and variant are required'));
+      return res.status(400).json(apiResponse(400, false, 'Quantity and variant are required'));
     }
 
     if (!variant.size || !variant.color || !variant.color.name) {
       console.log('Validation failed: Invalid variant structure');
-      return res.status(400).json(errorResponse('Variant must include size and color name'));
+      return res.status(400).json(apiResponse(400, false, 'Variant must include size and color name'));
     }
 
     if (quantity < 0 || quantity > 99) {
       console.log('Validation failed: Invalid quantity');
-      return res.status(400).json(errorResponse('Quantity must be between 0 and 99'));
+      return res.status(400).json(apiResponse(400, false, 'Quantity must be between 0 and 99'));
     }
 
     console.log('Input validation passed');
@@ -168,7 +168,7 @@ const updateCartItemQuantity = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found:', cart._id);
@@ -181,7 +181,7 @@ const updateCartItemQuantity = async (req, res) => {
     const updatedCart = await Cart.getCartWithItems(userId);
     console.log('Updated cart retrieved');
 
-    res.json(successResponse('Item quantity updated successfully', {
+    res.json(apiResponse(200, true, 'Item quantity updated successfully', {
       cart: updatedCart,
       itemCount: updatedCart.totalItems,
       subtotal: updatedCart.subtotal,
@@ -193,10 +193,10 @@ const updateCartItemQuantity = async (req, res) => {
     console.error('Error updating cart item quantity:', error);
     
     if (error.message === 'Item not found in cart') {
-      return res.status(404).json(errorResponse('Item not found in cart'));
+      return res.status(404).json(apiResponse(404, false, 'Item not found in cart'));
     }
     
-    res.status(500).json(errorResponse('Failed to update item quantity', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update item quantity', error.message));
   }
 };
 
@@ -214,12 +214,12 @@ const removeFromCart = async (req, res) => {
 
     if (!variant) {
       console.log('Validation failed: Variant is required');
-      return res.status(400).json(errorResponse('Variant is required'));
+      return res.status(400).json(apiResponse(400, false, 'Variant is required'));
     }
 
     if (!variant.size || !variant.color || !variant.color.name) {
       console.log('Validation failed: Invalid variant structure');
-      return res.status(400).json(errorResponse('Variant must include size and color name'));
+      return res.status(400).json(apiResponse(400, false, 'Variant must include size and color name'));
     }
 
     console.log('Input validation passed');
@@ -228,7 +228,7 @@ const removeFromCart = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found:', cart._id);
@@ -241,7 +241,7 @@ const removeFromCart = async (req, res) => {
     const updatedCart = await Cart.getCartWithItems(userId);
     console.log('Updated cart retrieved');
 
-    res.json(successResponse('Item removed from cart successfully', {
+    res.json(apiResponse(200, true, 'Item removed from cart successfully', {
       cart: updatedCart,
       itemCount: updatedCart.totalItems,
       subtotal: updatedCart.subtotal,
@@ -251,7 +251,7 @@ const removeFromCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error removing item from cart:', error);
-    res.status(500).json(errorResponse('Failed to remove item from cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to remove item from cart', error.message));
   }
 };
 
@@ -267,7 +267,7 @@ const clearCart = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found:', cart._id);
@@ -276,7 +276,7 @@ const clearCart = async (req, res) => {
     await cart.clearCart();
     console.log('Cart cleared successfully');
 
-    res.json(successResponse('Cart cleared successfully', {
+    res.json(apiResponse(200, true, 'Cart cleared successfully', {
       cart: cart,
       itemCount: 0,
       subtotal: 0,
@@ -286,7 +286,7 @@ const clearCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error clearing cart:', error);
-    res.status(500).json(errorResponse('Failed to clear cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to clear cart', error.message));
   }
 };
 
@@ -304,17 +304,17 @@ const updateCartItemNotes = async (req, res) => {
 
     if (!variant) {
       console.log('Validation failed: Variant is required');
-      return res.status(400).json(errorResponse('Variant is required'));
+      return res.status(400).json(apiResponse(400, false, 'Variant is required'));
     }
 
     if (!variant.size || !variant.color || !variant.color.name) {
       console.log('Validation failed: Invalid variant structure');
-      return res.status(400).json(errorResponse('Variant must include size and color name'));
+      return res.status(400).json(apiResponse(400, false, 'Variant must include size and color name'));
     }
 
     if (notes === undefined) {
       console.log('Validation failed: Notes are required');
-      return res.status(400).json(errorResponse('Notes are required'));
+      return res.status(400).json(apiResponse(400, false, 'Notes are required'));
     }
 
     console.log('Input validation passed');
@@ -323,7 +323,7 @@ const updateCartItemNotes = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found:', cart._id);
@@ -336,7 +336,7 @@ const updateCartItemNotes = async (req, res) => {
     const updatedCart = await Cart.getCartWithItems(userId);
     console.log('Updated cart retrieved');
 
-    res.json(successResponse('Item notes updated successfully', {
+    res.json(apiResponse(200, true, 'Item notes updated successfully', {
       cart: updatedCart
     }));
 
@@ -344,10 +344,10 @@ const updateCartItemNotes = async (req, res) => {
     console.error('Error updating cart item notes:', error);
     
     if (error.message === 'Item not found in cart') {
-      return res.status(404).json(errorResponse('Item not found in cart'));
+      return res.status(404).json(apiResponse(404, false, 'Item not found in cart'));
     }
     
-    res.status(500).json(errorResponse('Failed to update item notes', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to update item notes', error.message));
   }
 };
 
@@ -365,7 +365,7 @@ const checkItemInCart = async (req, res) => {
 
     if (!size || !colorName) {
       console.log('Validation failed: Size and color name are required');
-      return res.status(400).json(errorResponse('Size and color name are required'));
+      return res.status(400).json(apiResponse(400, false, 'Size and color name are required'));
     }
 
     console.log('Input validation passed');
@@ -378,7 +378,7 @@ const checkItemInCart = async (req, res) => {
     const isInCart = await Cart.isItemInCart(userId, itemId, variant);
     console.log('Item in cart check result:', isInCart);
 
-    res.json(successResponse('Item cart status checked successfully', {
+    res.json(apiResponse(200, true, 'Item cart status checked successfully', {
       itemId: itemId,
       variant: variant,
       isInCart: isInCart
@@ -386,7 +386,7 @@ const checkItemInCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error checking item in cart:', error);
-    res.status(500).json(errorResponse('Failed to check item in cart', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to check item in cart', error.message));
   }
 };
 
@@ -401,11 +401,11 @@ const getCartStats = async (req, res) => {
     const stats = await Cart.getCartStats(userId);
     console.log('Cart statistics calculated:', stats);
 
-    res.json(successResponse('Cart statistics retrieved successfully', stats));
+    res.json(apiResponse(200, true, 'Cart statistics retrieved successfully', stats));
 
   } catch (error) {
     console.error('Error getting cart statistics:', error);
-    res.status(500).json(errorResponse('Failed to get cart statistics', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to get cart statistics', error.message));
   }
 };
 
@@ -421,7 +421,7 @@ const toggleCartStatus = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found, current status:', cart.isActive);
@@ -430,13 +430,13 @@ const toggleCartStatus = async (req, res) => {
     await cart.toggleStatus();
     console.log('Cart status toggled successfully');
 
-    res.json(successResponse('Cart status toggled successfully', {
+    res.json(apiResponse(200, true, 'Cart status toggled successfully', {
       cart: cart
     }));
 
   } catch (error) {
     console.error('Error toggling cart status:', error);
-    res.status(500).json(errorResponse('Failed to toggle cart status', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to toggle cart status', error.message));
   }
 };
 
@@ -452,12 +452,12 @@ const applyCartDiscount = async (req, res) => {
 
     if (!discountPercentage) {
       console.log('Validation failed: Discount percentage is required');
-      return res.status(400).json(errorResponse('Discount percentage is required'));
+      return res.status(400).json(apiResponse(400, false, 'Discount percentage is required'));
     }
 
     if (discountPercentage < 0 || discountPercentage > 100) {
       console.log('Validation failed: Invalid discount percentage');
-      return res.status(400).json(errorResponse('Discount percentage must be between 0 and 100'));
+      return res.status(400).json(apiResponse(400, false, 'Discount percentage must be between 0 and 100'));
     }
 
     console.log('Input validation passed');
@@ -466,7 +466,7 @@ const applyCartDiscount = async (req, res) => {
     
     if (!cart) {
       console.log('Cart not found for user:', userId);
-      return res.status(404).json(errorResponse('Cart not found'));
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
     }
 
     console.log('Cart found:', cart._id);
@@ -479,7 +479,7 @@ const applyCartDiscount = async (req, res) => {
     const updatedCart = await Cart.getCartWithItems(userId);
     console.log('Updated cart retrieved');
 
-    res.json(successResponse('Discount applied successfully', {
+    res.json(apiResponse(200, true, 'Discount applied successfully', {
       cart: updatedCart,
       discountPercentage: discountPercentage,
       subtotal: updatedCart.subtotal,
@@ -489,7 +489,7 @@ const applyCartDiscount = async (req, res) => {
 
   } catch (error) {
     console.error('Error applying cart discount:', error);
-    res.status(500).json(errorResponse('Failed to apply discount', error.message));
+    res.status(500).json(apiResponse(500, false, 'Failed to apply discount', error.message));
   }
 };
 

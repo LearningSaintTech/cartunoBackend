@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { verifyAuth } = require('../middleware/auth');
 const {
   createAddress,
   getUserAddresses,
@@ -16,39 +16,39 @@ const {
 } = require('../controllers/addressController');
 
 // All routes require authentication
-router.use(auth);
+// router.use(verifyAuth);
 
 // Create a new address
-router.post('/', createAddress);
+router.post('/',verifyAuth(['user']), createAddress);
 
 // Get all addresses for the authenticated user
-router.get('/', getUserAddresses);
+router.get('/', verifyAuth(['user']), getUserAddresses);
 
 // Get default address
-router.get('/default', getDefaultAddress);
+router.get('/default',verifyAuth(['user']), getDefaultAddress);
 
 // Check if user has default address
-router.get('/has-default', hasDefaultAddress);
+router.get('/has-default',verifyAuth(['user']), hasDefaultAddress);
 
 // Get address count by type
-router.get('/count-by-type', getAddressCountByType);
+router.get('/count-by-type',verifyAuth(['user']), getAddressCountByType);
 
 // Get addresses by type (home, office, other)
-router.get('/type/:type', getAddressesByType);
+router.get('/type/:type',verifyAuth(['user']), getAddressesByType);
 
 // Get specific address by ID
-router.get('/:id', getAddressById);
+router.get('/:id',verifyAuth(['user']), getAddressById);
 
 // Update address
-router.put('/:id', updateAddress);
+router.put('/:id',verifyAuth(['user']), updateAddress);
 
 // Set address as default
-router.patch('/:id/set-default', setDefaultAddress);
+router.patch('/:id/set-default',verifyAuth(['user']), setDefaultAddress);
 
 // Toggle address status
-router.patch('/:id/toggle-status', toggleAddressStatus);
+router.patch('/:id/toggle-status',verifyAuth(['user']), toggleAddressStatus);
 
 // Delete address
-router.delete('/:id', deleteAddress);
+router.delete('/:id',verifyAuth(['user']), deleteAddress);
 
 module.exports = router;

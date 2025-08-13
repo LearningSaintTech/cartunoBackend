@@ -24,6 +24,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const reviewRatingRoutes = require('./routes/reviewRatingRoutes');
+const addressRoutes = require('./routes/addressRoutes');
 
 // Basic route
 app.get('/', (req, res) => {
@@ -46,6 +47,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/reviews', reviewRatingRoutes);
+app.use('/api/addresses', addressRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
