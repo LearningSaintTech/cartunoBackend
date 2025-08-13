@@ -1,0 +1,317 @@
+{
+  "items": [
+    {
+      "name": "iPhone 15 Pro Max",
+      "description": "The most advanced iPhone ever with A17 Pro chip, titanium design, and revolutionary camera system.",
+      "price": 1199.00,
+      "discountPrice": 1099.00,
+      "discountPercentage": 8,
+      "thumbnailImage": "https://example.com/images/iphone15-pro-max-thumb.jpg",
+      "keyHighlights": [
+        {
+          "key": "Chip",
+          "value": "A17 Pro chip with 6-core GPU"
+        },
+        {
+          "key": "Display",
+          "value": "6.7-inch Super Retina XDR OLED"
+        },
+        {
+          "key": "Camera",
+          "value": "48MP Main + 12MP Ultra Wide + 12MP Telephoto"
+        },
+        {
+          "key": "Battery",
+          "value": "Up to 29 hours video playback"
+        },
+        {
+          "key": "Material",
+          "value": "Titanium design with Ceramic Shield"
+        }
+      ],
+      "variants": [
+        {
+          "size": "128GB",
+          "colors": [
+            {
+              "name": "Natural Titanium",
+              "hexCode": "#8F8F8F",
+              "images": [
+                "https://example.com/images/iphone15-pro-max-128-nat-1.jpg",
+                "https://example.com/images/iphone15-pro-max-128-nat-2.jpg",
+                "https://example.com/images/iphone15-pro-max-128-nat-3.jpg"
+              ],
+              "sku": "IPH15PROMAX-128-NAT",
+              "stock": 45
+            },
+            {
+              "name": "Blue Titanium",
+              "hexCode": "#4A5D7C",
+              "images": [
+                "https://example.com/images/iphone15-pro-max-128-blu-1.jpg",
+                "https://example.com/images/iphone15-pro-max-128-blu-2.jpg",
+                "https://example.com/images/iphone15-pro-max-128-blu-3.jpg"
+              ],
+              "sku": "IPH15PROMAX-128-BLU",
+              "stock": 28
+            }
+          ]
+        },
+        {
+          "size": "256GB",
+          "colors": [
+            {
+              "name": "Natural Titanium",
+              "hexCode": "#8F8F8F",
+              "images": [
+                "https://example.com/images/iphone15-pro-max-256-nat-1.jpg",
+                "https://example.com/images/iphone15-pro-max-256-nat-2.jpg",
+                "https://example.com/images/iphone15-pro-max-256-nat-3.jpg"
+              ],
+              "sku": "IPH15PROMAX-256-NAT",
+              "stock": 32
+            },
+            {
+              "name": "Blue Titanium",
+              "hexCode": "#4A5D7C",
+              "images": [
+                "https://example.com/images/iphone15-pro-max-256-blu-1.jpg",
+                "https://example.com/images/iphone15-pro-max-256-blu-2.jpg",
+                "https://example.com/images/iphone15-pro-max-256-blu-3.jpg"
+              ],
+              "sku": "IPH15PROMAX-256-BLU",
+              "stock": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Nike Air Max 270",
+      "description": "Comfortable sneakers with visible Air unit for all-day comfort.",
+      "price": 150.00,
+      "discountPrice": 120.00,
+      "discountPercentage": 20,
+      "thumbnailImage": "https://example.com/images/nike-air-max-270-thumb.jpg",
+      "keyHighlights": [
+        {
+          "key": "Cushioning",
+          "value": "Nike Air Max 270 unit"
+        },
+        {
+          "key": "Upper",
+          "value": "Breathable mesh upper"
+        },
+        {
+          "key": "Sole",
+          "value": "Rubber outsole with Air Max unit"
+        },
+        {
+          "key": "Fit",
+          "value": "True to size with comfortable fit"
+        },
+        {
+          "key": "Style",
+          "value": "Classic Air Max silhouette"
+        }
+      ],
+      "variants": [
+        {
+          "size": "US 7",
+          "colors": [
+            {
+              "name": "White/Black",
+              "hexCode": "#FFFFFF",
+              "images": [
+                "https://example.com/images/nike-air-max-270-7-wht-1.jpg",
+                "https://example.com/images/nike-air-max-270-7-wht-2.jpg",
+                "https://example.com/images/nike-air-max-270-7-wht-3.jpg"
+              ],
+              "sku": "NIKEAIRMAX270-7-WHT",
+              "stock": 67
+            },
+            {
+              "name": "Black/Red",
+              "hexCode": "#000000",
+              "images": [
+                "https://example.com/images/nike-air-max-270-7-blk-1.jpg",
+                "https://example.com/images/nike-air-max-270-7-blk-2.jpg",
+                "https://example.com/images/nike-air-max-270-7-blk-3.jpg"
+              ],
+              "sku": "NIKEAIRMAX270-7-BLK",
+              "stock": 45
+            }
+          ]
+        },
+        {
+          "size": "US 8",
+          "colors": [
+            {
+              "name": "White/Black",
+              "hexCode": "#FFFFFF",
+              "images": [
+                "https://example.com/images/nike-air-max-270-8-wht-1.jpg",
+                "https://example.com/images/nike-air-max-270-8-wht-2.jpg",
+                "https://example.com/images/nike-air-max-270-8-wht-3.jpg"
+              ],
+              "sku": "NIKEAIRMAX270-8-WHT",
+              "stock": 89
+            },
+            {
+              "name": "Black/Red",
+              "hexCode": "#000000",
+              "images": [
+                "https://example.com/images/nike-air-max-270-8-blk-1.jpg",
+                "https://example.com/images/nike-air-max-270-8-blk-2.jpg",
+                "https://example.com/images/nike-air-max-270-8-blk-3.jpg"
+              ],
+              "sku": "NIKEAIRMAX270-8-BLK",
+              "stock": 67
+            }
+          ]
+        },
+        {
+          "size": "US 9",
+          "colors": [
+            {
+              "name": "White/Black",
+              "hexCode": "#FFFFFF",
+              "images": [
+                "https://example.com/images/nike-air-max-270-9-wht-1.jpg",
+                "https://example.com/images/nike-air-max-270-9-wht-2.jpg",
+                "https://example.com/images/nike-air-max-270-9-wht-3.jpg"
+              ],
+              "sku": "NIKEAIRMAX270-9-WHT",
+              "stock": 112
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Samsung 65\" QLED 4K Smart TV",
+      "description": "65-inch QLED 4K Smart TV with Quantum Dot technology and HDR10+.",
+      "price": 1299.00,
+      "discountPrice": 1099.00,
+      "discountPercentage": 15,
+      "thumbnailImage": "https://example.com/images/samsung-65-qled-thumb.jpg",
+      "keyHighlights": [
+        {
+          "key": "Resolution",
+          "value": "4K Ultra HD (3840 x 2160)"
+        },
+        {
+          "key": "Display Technology",
+          "value": "QLED with Quantum Dot"
+        },
+        {
+          "key": "HDR",
+          "value": "HDR10+, HLG support"
+        },
+        {
+          "key": "Smart Features",
+          "value": "Tizen OS with Alexa Built-in"
+        },
+        {
+          "key": "Gaming",
+          "value": "Low input lag for gaming"
+        }
+      ],
+      "variants": [
+        {
+          "size": "65\"",
+          "colors": [
+            {
+              "name": "Black",
+              "hexCode": "#000000",
+              "images": [
+                "https://example.com/images/samsung-65-qled-65-blk-1.jpg",
+                "https://example.com/images/samsung-65-qled-65-blk-2.jpg",
+                "https://example.com/images/samsung-65-qled-65-blk-3.jpg",
+                "https://example.com/images/samsung-65-qled-65-blk-4.jpg",
+                "https://example.com/images/samsung-65-qled-65-blk-5.jpg"
+              ],
+              "sku": "SAMSUNG65QLED-65-BLK",
+              "stock": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MacBook Pro 14\" M3 Pro",
+      "description": "14-inch MacBook Pro with M3 Pro chip and Liquid Retina XDR display.",
+      "price": 1999.00,
+      "discountPrice": 1799.00,
+      "discountPercentage": 10,
+      "thumbnailImage": "https://example.com/images/macbook-pro-14-m3-thumb.jpg",
+      "keyHighlights": [
+        {
+          "key": "Processor",
+          "value": "Apple M3 Pro chip with 11-core CPU and 14-core GPU"
+        },
+        {
+          "key": "Memory",
+          "value": "18GB unified memory"
+        },
+        {
+          "key": "Display",
+          "value": "14-inch Liquid Retina XDR display (3024 x 1964)"
+        },
+        {
+          "key": "Battery",
+          "value": "Up to 22 hours of battery life"
+        },
+        {
+          "key": "Ports",
+          "value": "HDMI, SDXC, MagSafe 3, Thunderbolt 4"
+        }
+      ],
+      "variants": [
+        {
+          "size": "512GB SSD",
+          "colors": [
+            {
+              "name": "Space Black",
+              "hexCode": "#1D1D1F",
+              "images": [
+                "https://example.com/images/macbook-pro-14-m3-512-blk-1.jpg",
+                "https://example.com/images/macbook-pro-14-m3-512-blk-2.jpg",
+                "https://example.com/images/macbook-pro-14-m3-512-blk-3.jpg"
+              ],
+              "sku": "MACBOOKPRO14M3-512-BLK",
+              "stock": 18
+            },
+            {
+              "name": "Silver",
+              "hexCode": "#E3E3E3",
+              "images": [
+                "https://example.com/images/macbook-pro-14-m3-512-slv-1.jpg",
+                "https://example.com/images/macbook-pro-14-m3-512-slv-2.jpg",
+                "https://example.com/images/macbook-pro-14-m3-512-slv-3.jpg"
+              ],
+              "sku": "MACBOOKPRO14M3-512-SLV",
+              "stock": 15
+            }
+          ]
+        },
+        {
+          "size": "1TB SSD",
+          "colors": [
+            {
+              "name": "Space Black",
+              "hexCode": "#1D1D1F",
+              "images": [
+                "https://example.com/images/macbook-pro-14-m3-1tb-blk-1.jpg",
+                "https://example.com/images/macbook-pro-14-m3-1tb-blk-2.jpg",
+                "https://example.com/images/macbook-pro-14-m3-1tb-blk-3.jpg"
+              ],
+              "sku": "MACBOOKPRO14M3-1TB-BLK",
+              "stock": 12
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

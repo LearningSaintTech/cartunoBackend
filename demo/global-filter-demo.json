@@ -1,0 +1,399 @@
+{
+  "globalFilters": [
+    {
+      "key": "occasion",
+      "displayName": "Occasion",
+      "values": [
+        {
+          "value": "party",
+          "displayName": "Party",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "formal",
+          "displayName": "Formal",
+          "count": 234,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "office",
+          "displayName": "Office",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "casual",
+          "displayName": "Casual",
+          "count": 312,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "sport",
+          "displayName": "Sport",
+          "count": 98,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "wedding",
+          "displayName": "Wedding",
+          "count": 67,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439011",
+      "isActive": true,
+      "sortOrder": 1,
+      "description": "Filter products by occasion or event type"
+    },
+    {
+      "key": "brand",
+      "displayName": "Brand",
+      "values": [
+        {
+          "value": "apple",
+          "displayName": "Apple",
+          "count": 89,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "nike",
+          "displayName": "Nike",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "samsung",
+          "displayName": "Samsung",
+          "count": 78,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "adidas",
+          "displayName": "Adidas",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "sony",
+          "displayName": "Sony",
+          "count": 45,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "lg",
+          "displayName": "LG",
+          "count": 67,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439012",
+      "isActive": true,
+      "sortOrder": 2,
+      "description": "Filter products by brand name"
+    },
+    {
+      "key": "size",
+      "displayName": "Size",
+      "values": [
+        {
+          "value": "xs",
+          "displayName": "Extra Small (XS)",
+          "count": 89,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "s",
+          "displayName": "Small (S)",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "m",
+          "displayName": "Medium (M)",
+          "count": 234,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "l",
+          "displayName": "Large (L)",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "xl",
+          "displayName": "Extra Large (XL)",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "xxl",
+          "displayName": "2XL",
+          "count": 78,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439013",
+      "isActive": true,
+      "sortOrder": 3,
+      "description": "Filter products by clothing size"
+    },
+    {
+      "key": "color",
+      "displayName": "Color",
+      "values": [
+        {
+          "value": "black",
+          "displayName": "Black",
+          "count": 289,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "white",
+          "displayName": "White",
+          "count": 234,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "red",
+          "displayName": "Red",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "blue",
+          "displayName": "Blue",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "green",
+          "displayName": "Green",
+          "count": 98,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "yellow",
+          "displayName": "Yellow",
+          "count": 67,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439014",
+      "isActive": true,
+      "sortOrder": 4,
+      "description": "Filter products by color"
+    },
+    {
+      "key": "price_range",
+      "displayName": "Price Range",
+      "values": [
+        {
+          "value": "0-50",
+          "displayName": "Under $50",
+          "count": 234,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "50-100",
+          "displayName": "$50 - $100",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "100-200",
+          "displayName": "$100 - $200",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "200-500",
+          "displayName": "$200 - $500",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "500-1000",
+          "displayName": "$500 - $1000",
+          "count": 89,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "1000+",
+          "displayName": "Over $1000",
+          "count": 67,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439015",
+      "isActive": true,
+      "sortOrder": 5,
+      "description": "Filter products by price range"
+    },
+    {
+      "key": "material",
+      "displayName": "Material",
+      "values": [
+        {
+          "value": "cotton",
+          "displayName": "Cotton",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "polyester",
+          "displayName": "Polyester",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "leather",
+          "displayName": "Leather",
+          "count": 89,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "denim",
+          "displayName": "Denim",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "silk",
+          "displayName": "Silk",
+          "count": 67,
+          "isActive": true,
+          "sortOrder": 5
+        },
+        {
+          "value": "wool",
+          "displayName": "Wool",
+          "count": 78,
+          "isActive": true,
+          "sortOrder": 6
+        }
+      ],
+      "category": "507f1f77bcf86cd799439013",
+      "isActive": true,
+      "sortOrder": 6,
+      "description": "Filter products by material type"
+    },
+    {
+      "key": "season",
+      "displayName": "Season",
+      "values": [
+        {
+          "value": "spring",
+          "displayName": "Spring",
+          "count": 156,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "summer",
+          "displayName": "Summer",
+          "count": 234,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "autumn",
+          "displayName": "Autumn",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "winter",
+          "displayName": "Winter",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 4
+        },
+        {
+          "value": "all_season",
+          "displayName": "All Season",
+          "count": 289,
+          "isActive": true,
+          "sortOrder": 5
+        }
+      ],
+      "category": "507f1f77bcf86cd799439011",
+      "isActive": true,
+      "sortOrder": 7,
+      "description": "Filter products by season"
+    },
+    {
+      "key": "age_group",
+      "displayName": "Age Group",
+      "values": [
+        {
+          "value": "kids",
+          "displayName": "Kids (0-12)",
+          "count": 134,
+          "isActive": true,
+          "sortOrder": 1
+        },
+        {
+          "value": "teens",
+          "displayName": "Teens (13-19)",
+          "count": 189,
+          "isActive": true,
+          "sortOrder": 2
+        },
+        {
+          "value": "adults",
+          "displayName": "Adults (20-59)",
+          "count": 456,
+          "isActive": true,
+          "sortOrder": 3
+        },
+        {
+          "value": "seniors",
+          "displayName": "Seniors (60+)",
+          "count": 89,
+          "isActive": true,
+          "sortOrder": 4
+        }
+      ],
+      "category": "507f1f77bcf86cd799439016",
+      "isActive": true,
+      "sortOrder": 8,
+      "description": "Filter products by target age group"
+    }
+  ]
+}

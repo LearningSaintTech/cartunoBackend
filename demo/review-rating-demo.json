@@ -1,0 +1,274 @@
+{
+  "reviewRatings": [
+    {
+      "_id": "507f1f77bcf86cd799439041",
+      "user": "507f1f77bcf86cd799439001",
+      "item": "507f1f77bcf86cd799439011",
+      "rating": 5,
+      "title": "Excellent iPhone 15 Pro Max!",
+      "text": "This is absolutely the best iPhone I've ever owned. The A17 Pro chip is incredibly fast, the camera quality is outstanding, and the titanium build feels premium. Battery life easily lasts all day even with heavy usage. The 48MP camera captures stunning photos with amazing detail. Worth every penny!",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/iphone15-review-1.jpg",
+          "caption": "Camera quality test photo",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/iphone15-review-2.jpg",
+          "caption": "Battery life screenshot",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 45,
+      "notHelpfulCount": 2,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": true,
+      "isAnonymous": false,
+      "tags": ["camera", "battery", "performance", "premium"],
+      "sentiment": "positive",
+      "category": "quality"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439042",
+      "user": "507f1f77bcf86cd799439002",
+      "item": "507f1f77bcf86cd799439011",
+      "rating": 4,
+      "title": "Great phone with minor issues",
+      "text": "Overall a fantastic device. The performance is amazing and the camera is incredible. However, I noticed some heating issues during gaming sessions and the price is quite steep. The titanium finish looks great and the phone feels solid in hand. Would recommend for power users.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/iphone15-review-3.jpg",
+          "caption": "Gaming performance test",
+          "isVerified": false
+        }
+      ],
+      "helpfulCount": 23,
+      "notHelpfulCount": 5,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["gaming", "heating", "performance", "camera"],
+      "sentiment": "positive",
+      "category": "general"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439043",
+      "user": "507f1f77bcf86cd799439003",
+      "item": "507f1f77bcf86cd799439012",
+      "rating": 5,
+      "title": "Perfect Nike Air Max 270",
+      "text": "These shoes are incredibly comfortable! The Air Max unit provides excellent cushioning and the mesh upper keeps my feet cool. Perfect for daily wear and light workouts. The design is classic and goes with everything. Already ordered a second pair!",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/nike-review-1.jpg",
+          "caption": "Comfort test after long walk",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/nike-review-2.jpg",
+          "caption": "Style with different outfits",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 67,
+      "notHelpfulCount": 1,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": true,
+      "isAnonymous": false,
+      "tags": ["comfort", "style", "cushioning", "versatile"],
+      "sentiment": "positive",
+      "category": "quality"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439044",
+      "user": "507f1f77bcf86cd799439004",
+      "item": "507f1f77bcf86cd799439012",
+      "rating": 3,
+      "title": "Decent but overpriced",
+      "text": "The shoes are comfortable and look good, but I think they're overpriced for what you get. The cushioning is nice but not exceptional. They run a bit small, so order half size up. Good for casual wear but not worth the premium price tag.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/nike-review-3.jpg",
+          "caption": "Size comparison",
+          "isVerified": false
+        }
+      ],
+      "helpfulCount": 12,
+      "notHelpfulCount": 8,
+      "isVerified": false,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["overpriced", "sizing", "casual", "comfort"],
+      "sentiment": "neutral",
+      "category": "value"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439045",
+      "user": "507f1f77bcf86cd799439005",
+      "item": "507f1f77bcf86cd799439013",
+      "rating": 5,
+      "title": "Amazing Samsung QLED TV!",
+      "text": "This TV is absolutely stunning! The picture quality is incredible with deep blacks and vibrant colors. HDR content looks amazing and the smart features work flawlessly. The 65-inch size is perfect for our living room. Gaming mode has very low input lag. Highly recommended!",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/samsung-tv-review-1.jpg",
+          "caption": "HDR movie test",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/samsung-tv-review-2.jpg",
+          "caption": "Gaming setup",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/samsung-tv-review-3.jpg",
+          "caption": "Smart features demo",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 89,
+      "notHelpfulCount": 3,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": true,
+      "isAnonymous": false,
+      "tags": ["picture quality", "HDR", "gaming", "smart features"],
+      "sentiment": "positive",
+      "category": "quality"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439046",
+      "user": "507f1f77bcf86cd799439001",
+      "item": "507f1f77bcf86cd799439013",
+      "rating": 2,
+      "title": "Disappointed with delivery and setup",
+      "text": "The TV itself is good, but the delivery experience was terrible. The delivery person was rude and left the box in the rain. Setup was complicated and the remote control feels cheap. Picture quality is decent but not worth the hassle. Customer service was unhelpful.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/samsung-tv-review-4.jpg",
+          "caption": "Damaged packaging",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 34,
+      "notHelpfulCount": 15,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["delivery", "setup", "customer service", "remote"],
+      "sentiment": "negative",
+      "category": "service"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439047",
+      "user": "507f1f77bcf86cd799439002",
+      "item": "507f1f77bcf86cd799439014",
+      "rating": 5,
+      "title": "MacBook Pro M3 Pro is a beast!",
+      "text": "This laptop is absolutely incredible! The M3 Pro chip handles everything I throw at it without breaking a sweat. Video editing, 3D rendering, and multiple virtual machines run simultaneously without any lag. The display is gorgeous and the battery life is amazing. Best laptop I've ever owned!",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/macbook-review-1.jpg",
+          "caption": "Performance benchmark results",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/macbook-review-2.jpg",
+          "caption": "Video editing workflow",
+          "isVerified": true
+        },
+        {
+          "url": "https://example.com/images/reviews/macbook-review-3.jpg",
+          "caption": "Battery life test",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 156,
+      "notHelpfulCount": 4,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": true,
+      "isAnonymous": false,
+      "tags": ["performance", "battery", "display", "video editing"],
+      "sentiment": "positive",
+      "category": "quality"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439048",
+      "user": "507f1f77bcf86cd799439003",
+      "item": "507f1f77bcf86cd799439014",
+      "rating": 4,
+      "title": "Great performance, expensive but worth it",
+      "text": "The M3 Pro chip is incredibly powerful and handles all my development work effortlessly. The build quality is excellent and the keyboard feels great. However, the price is quite high and the lack of upgradeability is a concern. Overall, a fantastic machine for professionals.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/macbook-review-4.jpg",
+          "caption": "Development environment setup",
+          "isVerified": false
+        }
+      ],
+      "helpfulCount": 45,
+      "notHelpfulCount": 7,
+      "isVerified": false,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["development", "performance", "build quality", "expensive"],
+      "sentiment": "positive",
+      "category": "value"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439049",
+      "user": "507f1f77bcf86cd799439004",
+      "item": "507f1f77bcf86cd799439011",
+      "rating": 1,
+      "title": "Terrible experience, avoid this phone",
+      "text": "This phone has been nothing but problems since day one. Constant crashes, poor battery life, and the camera quality is nowhere near what was advertised. Customer support was unhelpful and refused to replace the device. Save your money and buy something else.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/iphone15-review-4.jpg",
+          "caption": "App crash screenshots",
+          "isVerified": true
+        }
+      ],
+      "helpfulCount": 23,
+      "notHelpfulCount": 45,
+      "isVerified": true,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["crashes", "battery", "camera", "customer support"],
+      "sentiment": "negative",
+      "category": "quality"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439050",
+      "user": "507f1f77bcf86cd799439005",
+      "item": "507f1f77bcf86cd799439012",
+      "rating": 4,
+      "title": "Good shoes for the price",
+      "text": "These Nike shoes are comfortable and stylish. The Air Max technology provides good cushioning for daily wear. They're lightweight and breathable. The only downside is that they get dirty easily and are hard to clean. Overall, good value for money.",
+      "images": [
+        {
+          "url": "https://example.com/images/reviews/nike-review-4.jpg",
+          "caption": "Daily wear test",
+          "isVerified": false
+        }
+      ],
+      "helpfulCount": 18,
+      "notHelpfulCount": 3,
+      "isVerified": false,
+      "isActive": true,
+      "isFeatured": false,
+      "isAnonymous": false,
+      "tags": ["comfortable", "stylish", "lightweight", "hard to clean"],
+      "sentiment": "positive",
+      "category": "value"
+    }
+  ]
+}

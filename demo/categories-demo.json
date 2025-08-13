@@ -1,0 +1,52 @@
+{
+  "categories": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "name": "Lifestyle",
+      "description": "Products related to lifestyle, occasions, and seasonal preferences",
+      "image": "https://example.com/images/categories/lifestyle.jpg",
+      "isActive": true,
+      "sortOrder": 1
+    },
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "name": "Brand",
+      "description": "Products filtered by brand names and manufacturers",
+      "image": "https://example.com/images/categories/brand.jpg",
+      "isActive": true,
+      "sortOrder": 2
+    },
+    {
+      "_id": "507f1f77bcf86cd799439013",
+      "name": "Clothing",
+      "description": "Apparel and clothing related filters including size and material",
+      "image": "https://example.com/images/categories/clothing.jpg",
+      "isActive": true,
+      "sortOrder": 3
+    },
+    {
+      "_id": "507f1f77bcf86cd799439014",
+      "name": "Appearance",
+      "description": "Visual and aesthetic filters like color and style",
+      "image": "https://example.com/images/categories/appearance.jpg",
+      "isActive": true,
+      "sortOrder": 4
+    },
+    {
+      "_id": "507f1f77bcf86cd799439015",
+      "name": "Price",
+      "description": "Price range and affordability filters",
+      "image": "https://example.com/images/categories/price.jpg",
+      "isActive": true,
+      "sortOrder": 5
+    },
+    {
+      "_id": "507f1f77bcf86cd799439016",
+      "name": "Demographics",
+      "description": "Target audience and demographic filters",
+      "image": "https://example.com/images/categories/demographics.jpg",
+      "isActive": true,
+      "sortOrder": 6
+    }
+  ]
+}

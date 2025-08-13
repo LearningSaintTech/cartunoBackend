@@ -1,0 +1,565 @@
+{
+  "items": [
+    {
+      "name": "iPhone 15 Pro Max",
+      "description": "The most advanced iPhone ever with A17 Pro chip, titanium design, and revolutionary camera system. Features 6.7-inch Super Retina XDR display, 48MP main camera with 2x Telephoto, and USB-C connectivity.",
+      "shortDescription": "Premium iPhone with A17 Pro chip, titanium design, and advanced camera system",
+      "sku": "IPH15PROMAX",
+      "category": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "subCategory": "64f8a1b2c3d4e5f6a7b8c9d1",
+      "brand": "Apple",
+      "basePrice": 1199.00,
+      "comparePrice": 1299.00,
+      "discountPercentage": 8,
+      "finalPrice": 1103.12,
+      "costPrice": 800.00,
+      "profitMargin": 37.5,
+      "images": {
+        "main": "https://example.com/images/iphone15-pro-max-main.jpg",
+        "gallery": [
+          "https://example.com/images/iphone15-pro-max-1.jpg",
+          "https://example.com/images/iphone15-pro-max-2.jpg",
+          "https://example.com/images/iphone15-pro-max-3.jpg",
+          "https://example.com/images/iphone15-pro-max-4.jpg"
+        ],
+        "thumbnail": "https://example.com/images/iphone15-pro-max-thumb.jpg"
+      },
+      "variants": [
+        {
+          "size": "128GB",
+          "color": {
+            "name": "Natural Titanium",
+            "hex": "#8F8F8F"
+          },
+          "sku": "IPH15PROMAX-128-NAT",
+          "price": 1199.00,
+          "comparePrice": 1299.00,
+          "stock": 45,
+          "weight": 221,
+          "dimensions": {
+            "length": 15.9,
+            "width": 7.7,
+            "height": 0.8
+          },
+          "images": [
+            "https://example.com/images/iphone15-pro-max-128-nat-1.jpg",
+            "https://example.com/images/iphone15-pro-max-128-nat-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "256GB",
+          "color": {
+            "name": "Natural Titanium",
+            "hex": "#8F8F8F"
+          },
+          "sku": "IPH15PROMAX-256-NAT",
+          "price": 1299.00,
+          "comparePrice": 1399.00,
+          "stock": 32,
+          "weight": 221,
+          "dimensions": {
+            "length": 15.9,
+            "width": 7.7,
+            "height": 0.8
+          },
+          "images": [
+            "https://example.com/images/iphone15-pro-max-256-nat-1.jpg",
+            "https://example.com/images/iphone15-pro-max-256-nat-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "128GB",
+          "color": {
+            "name": "Blue Titanium",
+            "hex": "#4A5D7C"
+          },
+          "sku": "IPH15PROMAX-128-BLU",
+          "price": 1199.00,
+          "comparePrice": 1299.00,
+          "stock": 28,
+          "weight": 221,
+          "dimensions": {
+            "length": 15.9,
+            "width": 7.7,
+            "height": 0.8
+          },
+          "images": [
+            "https://example.com/images/iphone15-pro-max-128-blu-1.jpg",
+            "https://example.com/images/iphone15-pro-max-128-blu-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "256GB",
+          "color": {
+            "name": "Blue Titanium",
+            "hex": "#4A5D7C"
+          },
+          "sku": "IPH15PROMAX-256-BLU",
+          "price": 1299.00,
+          "comparePrice": 1399.00,
+          "stock": 25,
+          "weight": 221,
+          "dimensions": {
+            "length": 15.9,
+            "width": 7.7,
+            "height": 0.8
+          },
+          "images": [
+            "https://example.com/images/iphone15-pro-max-256-blu-1.jpg",
+            "https://example.com/images/iphone15-pro-max-256-blu-2.jpg"
+          ],
+          "isActive": true
+        }
+      ],
+      "specifications": {
+        "material": "Titanium, Ceramic Shield",
+        "care": "Clean with soft, lint-free cloth. Avoid abrasive materials.",
+        "origin": "Designed in California, Assembled in China",
+        "warranty": "1 Year Limited Warranty",
+        "additional": [
+          {
+            "name": "Chip",
+            "value": "A17 Pro chip with 6-core GPU"
+          },
+          {
+            "name": "Display",
+            "value": "6.7-inch Super Retina XDR OLED"
+          },
+          {
+            "name": "Camera",
+            "value": "48MP Main + 12MP Ultra Wide + 12MP Telephoto"
+          }
+        ]
+      },
+      "tags": [
+        "smartphone",
+        "iphone",
+        "apple",
+        "5g",
+        "camera",
+        "titanium",
+        "premium"
+      ],
+      "isActive": true,
+      "isFeatured": true,
+      "isNew": true,
+      "isOnSale": true,
+      "sortOrder": 1,
+      "rating": {
+        "average": 4.8,
+        "count": 1247
+      },
+      "viewCount": 15678,
+      "soldCount": 892
+    },
+    {
+      "name": "Nike Air Max 270",
+      "description": "The Nike Air Max 270 delivers unrivaled, all-day comfort. The shoe's design draws inspiration from Air Max icons, showcasing Nike's greatest innovation with its large window and fresh array of colors.",
+      "shortDescription": "Comfortable sneakers with visible Air unit for all-day comfort",
+      "sku": "NIKEAIRMAX270",
+      "category": "64f8a1b2c3d4e5f6a7b8c9d2",
+      "subCategory": "64f8a1b2c3d4e5f6a7b8c9d3",
+      "brand": "Nike",
+      "basePrice": 150.00,
+      "comparePrice": 180.00,
+      "discountPercentage": 17,
+      "finalPrice": 124.50,
+      "costPrice": 75.00,
+      "profitMargin": 66.7,
+      "images": {
+        "main": "https://example.com/images/nike-air-max-270-main.jpg",
+        "gallery": [
+          "https://example.com/images/nike-air-max-270-1.jpg",
+          "https://example.com/images/nike-air-max-270-2.jpg",
+          "https://example.com/images/nike-air-max-270-3.jpg"
+        ],
+        "thumbnail": "https://example.com/images/nike-air-max-270-thumb.jpg"
+      },
+      "variants": [
+        {
+          "size": "US 7",
+          "color": {
+            "name": "White/Black",
+            "hex": "#FFFFFF"
+          },
+          "sku": "NIKEAIRMAX270-7-WHT",
+          "price": 150.00,
+          "comparePrice": 180.00,
+          "stock": 67,
+          "weight": 0.85,
+          "dimensions": {
+            "length": 28.5,
+            "width": 10.2,
+            "height": 12.0
+          },
+          "images": [
+            "https://example.com/images/nike-air-max-270-7-wht-1.jpg",
+            "https://example.com/images/nike-air-max-270-7-wht-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "US 8",
+          "color": {
+            "name": "White/Black",
+            "hex": "#FFFFFF"
+          },
+          "sku": "NIKEAIRMAX270-8-WHT",
+          "price": 150.00,
+          "comparePrice": 180.00,
+          "stock": 89,
+          "weight": 0.87,
+          "dimensions": {
+            "length": 29.2,
+            "width": 10.5,
+            "height": 12.2
+          },
+          "images": [
+            "https://example.com/images/nike-air-max-270-8-wht-1.jpg",
+            "https://example.com/images/nike-air-max-270-8-wht-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "US 9",
+          "color": {
+            "name": "White/Black",
+            "hex": "#FFFFFF"
+          },
+          "sku": "NIKEAIRMAX270-9-WHT",
+          "price": 150.00,
+          "comparePrice": 180.00,
+          "stock": 112,
+          "weight": 0.89,
+          "dimensions": {
+            "length": 29.8,
+            "width": 10.8,
+            "height": 12.4
+          },
+          "images": [
+            "https://example.com/images/nike-air-max-270-9-wht-1.jpg",
+            "https://example.com/images/nike-air-max-270-9-wht-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "US 7",
+          "color": {
+            "name": "Black/Red",
+            "hex": "#000000"
+          },
+          "sku": "NIKEAIRMAX270-7-BLK",
+          "price": 150.00,
+          "comparePrice": 180.00,
+          "stock": 45,
+          "weight": 0.85,
+          "dimensions": {
+            "length": 28.5,
+            "width": 10.2,
+            "height": 12.0
+          },
+          "images": [
+            "https://example.com/images/nike-air-max-270-7-blk-1.jpg",
+            "https://example.com/images/nike-air-max-270-7-blk-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "US 8",
+          "color": {
+            "name": "Black/Red",
+            "hex": "#000000"
+          },
+          "sku": "NIKEAIRMAX270-8-BLK",
+          "price": 150.00,
+          "comparePrice": 180.00,
+          "stock": 67,
+          "weight": 0.87,
+          "dimensions": {
+            "length": 29.2,
+            "width": 10.5,
+            "height": 12.2
+          },
+          "images": [
+            "https://example.com/images/nike-air-max-270-8-blk-1.jpg",
+            "https://example.com/images/nike-air-max-270-8-blk-2.jpg"
+          ],
+          "isActive": true
+        }
+      ],
+      "specifications": {
+        "material": "Mesh, Synthetic, Rubber",
+        "care": "Clean with mild soap and water. Air dry away from direct heat.",
+        "origin": "Designed in Oregon, Made in Vietnam",
+        "warranty": "2 Year Limited Warranty",
+        "additional": [
+          {
+            "name": "Sole",
+            "value": "Rubber outsole with Air Max unit"
+          },
+          {
+            "name": "Upper",
+            "value": "Breathable mesh upper"
+          },
+          {
+            "name": "Cushioning",
+            "value": "Nike Air Max 270 unit"
+          }
+        ]
+      },
+      "tags": [
+        "shoes",
+        "sneakers",
+        "nike",
+        "running",
+        "comfortable",
+        "air max",
+        "casual"
+      ],
+      "isActive": true,
+      "isFeatured": true,
+      "isNew": false,
+      "isOnSale": true,
+      "sortOrder": 2,
+      "rating": {
+        "average": 4.6,
+        "count": 892
+      },
+      "viewCount": 9876,
+      "soldCount": 567
+    },
+    {
+      "name": "Samsung 65\" QLED 4K Smart TV",
+      "description": "Experience stunning picture quality with Quantum Dot technology and 4K resolution. Features HDR10+, Alexa built-in, and a sleek design that fits any room. Perfect for gaming with low input lag and smooth motion.",
+      "shortDescription": "65-inch QLED 4K Smart TV with Quantum Dot technology and HDR10+",
+      "sku": "SAMSUNG65QLED",
+      "category": "64f8a1b2c3d4e5f6a7b8c9d4",
+      "subCategory": "64f8a1b2c3d4e5f6a7b8c9d5",
+      "brand": "Samsung",
+      "basePrice": 1299.00,
+      "comparePrice": 1499.00,
+      "discountPercentage": 13,
+      "finalPrice": 1129.13,
+      "costPrice": 800.00,
+      "profitMargin": 41.1,
+      "images": {
+        "main": "https://example.com/images/samsung-65-qled-main.jpg",
+        "gallery": [
+          "https://example.com/images/samsung-65-qled-1.jpg",
+          "https://example.com/images/samsung-65-qled-2.jpg",
+          "https://example.com/images/samsung-65-qled-3.jpg",
+          "https://example.com/images/samsung-65-qled-4.jpg"
+        ],
+        "thumbnail": "https://example.com/images/samsung-65-qled-thumb.jpg"
+      },
+      "variants": [
+        {
+          "size": "65\"",
+          "color": {
+            "name": "Black",
+            "hex": "#000000"
+          },
+          "sku": "SAMSUNG65QLED-65-BLK",
+          "price": 1299.00,
+          "comparePrice": 1499.00,
+          "stock": 23,
+          "weight": 28.5,
+          "dimensions": {
+            "length": 145.1,
+            "width": 8.3,
+            "height": 83.1
+          },
+          "images": [
+            "https://example.com/images/samsung-65-qled-65-blk-1.jpg",
+            "https://example.com/images/samsung-65-qled-65-blk-2.jpg"
+          ],
+          "isActive": true
+        }
+      ],
+      "specifications": {
+        "material": "Plastic, Metal",
+        "care": "Clean with soft, dry cloth. Avoid liquid cleaners.",
+        "origin": "Designed in South Korea, Made in Vietnam",
+        "warranty": "1 Year Limited Warranty",
+        "additional": [
+          {
+            "name": "Resolution",
+            "value": "4K Ultra HD (3840 x 2160)"
+          },
+          {
+            "name": "Display Technology",
+            "value": "QLED with Quantum Dot"
+          },
+          {
+            "name": "HDR",
+            "value": "HDR10+, HLG"
+          },
+          {
+            "name": "Smart Features",
+            "value": "Tizen OS, Alexa Built-in"
+          }
+        ]
+      },
+      "tags": [
+        "tv",
+        "television",
+        "samsung",
+        "4k",
+        "qled",
+        "smart tv",
+        "hdr",
+        "gaming"
+      ],
+      "isActive": true,
+      "isFeatured": false,
+      "isNew": false,
+      "isOnSale": true,
+      "sortOrder": 3,
+      "rating": {
+        "average": 4.7,
+        "count": 456
+      },
+      "viewCount": 5432,
+      "soldCount": 234
+    },
+    {
+      "name": "MacBook Pro 14\" M3 Pro",
+      "description": "The most powerful MacBook Pro ever with the M3 Pro chip. Features a stunning 14-inch Liquid Retina XDR display, up to 22 hours of battery life, and a versatile array of ports. Perfect for professionals and creators.",
+      "shortDescription": "14-inch MacBook Pro with M3 Pro chip and Liquid Retina XDR display",
+      "sku": "MACBOOKPRO14M3",
+      "category": "64f8a1b2c3d4e5f6a7b8c9d6",
+      "subCategory": "64f8a1b2c3d4e5f6a7b8c9d7",
+      "brand": "Apple",
+      "basePrice": 1999.00,
+      "comparePrice": 2199.00,
+      "discountPercentage": 9,
+      "finalPrice": 1819.09,
+      "costPrice": 1200.00,
+      "profitMargin": 51.6,
+      "images": {
+        "main": "https://example.com/images/macbook-pro-14-m3-main.jpg",
+        "gallery": [
+          "https://example.com/images/macbook-pro-14-m3-1.jpg",
+          "https://example.com/images/macbook-pro-14-m3-2.jpg",
+          "https://example.com/images/macbook-pro-14-m3-3.jpg"
+        ],
+        "thumbnail": "https://example.com/images/macbook-pro-14-m3-thumb.jpg"
+      },
+      "variants": [
+        {
+          "size": "512GB SSD",
+          "color": {
+            "name": "Space Black",
+            "hex": "#1D1D1F"
+          },
+          "sku": "MACBOOKPRO14M3-512-BLK",
+          "price": 1999.00,
+          "comparePrice": 2199.00,
+          "stock": 18,
+          "weight": 1.61,
+          "dimensions": {
+            "length": 31.26,
+            "width": 22.12,
+            "height": 1.55
+          },
+          "images": [
+            "https://example.com/images/macbook-pro-14-m3-512-blk-1.jpg",
+            "https://example.com/images/macbook-pro-14-m3-512-blk-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "1TB SSD",
+          "color": {
+            "name": "Space Black",
+            "hex": "#1D1D1F"
+          },
+          "sku": "MACBOOKPRO14M3-1TB-BLK",
+          "price": 2199.00,
+          "comparePrice": 2399.00,
+          "stock": 12,
+          "weight": 1.61,
+          "dimensions": {
+            "length": 31.26,
+            "width": 22.12,
+            "height": 1.55
+          },
+          "images": [
+            "https://example.com/images/macbook-pro-14-m3-1tb-blk-1.jpg",
+            "https://example.com/images/macbook-pro-14-m3-1tb-blk-2.jpg"
+          ],
+          "isActive": true
+        },
+        {
+          "size": "512GB SSD",
+          "color": {
+            "name": "Silver",
+            "hex": "#E3E3E3"
+          },
+          "sku": "MACBOOKPRO14M3-512-SLV",
+          "price": 1999.00,
+          "comparePrice": 2199.00,
+          "stock": 15,
+          "weight": 1.61,
+          "dimensions": {
+            "length": 31.26,
+            "width": 22.12,
+            "height": 1.55
+          },
+          "images": [
+            "https://example.com/images/macbook-pro-14-m3-512-slv-1.jpg",
+            "https://example.com/images/macbook-pro-14-m3-512-slv-2.jpg"
+          ],
+          "isActive": true
+        }
+      ],
+      "specifications": {
+        "material": "Aluminum",
+        "care": "Clean with soft, lint-free cloth. Avoid abrasive materials.",
+        "origin": "Designed in California, Assembled in China",
+        "warranty": "1 Year Limited Warranty",
+        "additional": [
+          {
+            "name": "Processor",
+            "value": "Apple M3 Pro chip with 11-core CPU and 14-core GPU"
+          },
+          {
+            "name": "Memory",
+            "value": "18GB unified memory"
+          },
+          {
+            "name": "Display",
+            "value": "14-inch Liquid Retina XDR display (3024 x 1964)"
+          },
+          {
+            "name": "Battery",
+            "value": "Up to 22 hours of battery life"
+          }
+        ]
+      },
+      "tags": [
+        "laptop",
+        "macbook",
+        "apple",
+        "m3 pro",
+        "professional",
+        "creator",
+        "portable"
+      ],
+      "isActive": true,
+      "isFeatured": true,
+      "isNew": true,
+      "isOnSale": true,
+      "sortOrder": 4,
+      "rating": {
+        "average": 4.9,
+        "count": 234
+      },
+      "viewCount": 3456,
+      "soldCount": 156
+    }
+  ]
+}
