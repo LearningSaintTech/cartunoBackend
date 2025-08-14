@@ -141,17 +141,17 @@ const createItem = async (req, res) => {
 
           // Process images for this specific color
           let colorImages = [];
-          if (color.imageKeys && Array.isArray(color.imageKeys) && variantImages.length > 0) {
+          if (color.imageKeys && Array.isArray(color.imageKeys) && images.length > 0) {
             console.log(`Processing images for color: ${color.name}`);
-            // Filter variantImages that match the provided imageKeys
-            const matchedImages = variantImages.filter(file =>
+            // Filter images that match the provided imageKeys
+            const matchedImages = images.filter(file =>
               color.imageKeys.includes(file.originalname)
             );
             if (matchedImages.length === 0) {
               console.log(`Warning: No matching images found for color ${color.name}`);
             } 
             if (matchedImages.length > 0) {
-              colorImages = await uploadMultipleImagesToS3(matchedImages, 'items/variants');
+              colorImages = await uploadMultipleImagesToS3(matchedImages, 'items/bulk-upload');
             }
           }
 
@@ -977,6 +977,274 @@ const uploadVariantImages = async (req, res) => {
   }
 };
 
+// Bulk upload items
+const bulkUploadItems = async (req, res) => {
+  console.log('=== bulkUploadItems called ===');
+  console.log('Files received:', req.files);
+  console.log('Body:', req.body);
+  
+  try {
+    const jsonFile = req.files?.jsonFile?.[0];
+    const images = req.files?.images || [];
+    
+    if (!jsonFile) {
+      console.log('Validation failed: JSON file is required');
+      return res.status(400).json(
+        apiResponse(400, false, 'JSON file is required for bulk upload')
+      );
+    }
+
+    if (images.length > 25) {
+      console.log('Validation failed: Too many images');
+      return res.status(400).json(
+        apiResponse(400, false, 'Maximum 25 images allowed for bulk upload')
+      );
+    }
+
+    // Parse JSON file
+    let itemsData;
+    try {
+      const jsonContent = jsonFile.buffer.toString('utf8');
+      itemsData = JSON.parse(jsonContent);
+      console.log('JSON parsed successfully, items count:', itemsData.length);
+    } catch (parseError) {
+      console.log('JSON parsing failed:', parseError);
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid JSON file format')
+      );
+    }
+
+    if (!Array.isArray(itemsData)) {
+      console.log('Validation failed: JSON must contain an array of items');
+      return res.status(400).json(
+        apiResponse(400, false, 'JSON must contain an array of items')
+      );
+    }
+
+    if (itemsData.length === 0) {
+      console.log('Validation failed: Empty items array');
+      return res.status(400).json(
+        apiResponse(400, false, 'JSON file must contain at least one item')
+      );
+    }
+
+    if (itemsData.length > 100) {
+      console.log('Validation failed: Too many items');
+      return res.status(400).json(
+        apiResponse(400, false, 'Maximum 100 items allowed per bulk upload')
+      );
+    }
+
+    console.log('Processing bulk upload for', itemsData.length, 'items');
+
+    // Images will be processed individually for each item
+    console.log('Images will be processed individually for each item');
+    console.log('Available images:', images.map(f => f.originalname));
+
+    // Process each item
+    const results = {
+      successful: [],
+      failed: [],
+      totalProcessed: itemsData.length
+    };
+
+    for (let i = 0; i < itemsData.length; i++) {
+      const itemData = itemsData[i];
+      console.log(`Processing item ${i + 1}/${itemsData.length}:`, itemData.name || 'Unnamed item');
+
+      try {
+        // Validate required fields
+        if (!itemData.name || !itemData.price) {
+          throw new Error('Name and price are required');
+        }
+
+        // Validate price
+        const price = parseFloat(itemData.price);
+        if (isNaN(price) || price < 0) {
+          throw new Error('Price must be a valid non-negative number');
+        }
+
+        // Validate discount price if provided
+        let discountPrice = 0;
+        if (itemData.discountPrice !== undefined) {
+          discountPrice = parseFloat(itemData.discountPrice);
+          if (isNaN(discountPrice) || discountPrice < 0) {
+            throw new Error('Discount price must be a valid non-negative number');
+          }
+          if (discountPrice >= price) {
+            throw new Error('Discount price must be less than original price');
+          }
+        }
+
+        // Validate discount percentage if provided
+        let discountPercentage = 0;
+        if (itemData.discountPercentage !== undefined) {
+          discountPercentage = parseFloat(itemData.discountPercentage);
+          if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+            throw new Error('Discount percentage must be between 0 and 100');
+          }
+        }
+
+        // Process thumbnail image
+        let thumbnailImageUrl = '';
+        if (itemData.thumbnailImageKey) {
+          // Find image by filename
+          const thumbnailImage = images.find(file => file.originalname === itemData.thumbnailImageKey);
+          if (thumbnailImage) {
+            console.log(`Found thumbnail image: ${itemData.thumbnailImageKey}`);
+            thumbnailImageUrl = await uploadImageToS3(thumbnailImage, 'items/bulk-upload');
+            console.log(`Thumbnail uploaded to S3: ${thumbnailImageUrl}`);
+          } else {
+            throw new Error(`Thumbnail image not found: ${itemData.thumbnailImageKey}`);
+          }
+        } else if (itemData.thumbnailImage) {
+          // If thumbnail image URL is provided directly
+          thumbnailImageUrl = itemData.thumbnailImage;
+        } else {
+          throw new Error('Thumbnail image is required');
+        }
+
+        // Process variants if provided
+        let processedVariants = [];
+        if (itemData.variants && Array.isArray(itemData.variants)) {
+          for (const variant of itemData.variants) {
+            if (!variant.size || !variant.colors || !Array.isArray(variant.colors)) {
+              throw new Error('Each variant must have size and colors array');
+            }
+
+            const processedColors = [];
+            for (const color of variant.colors) {
+              if (!color.name || !color.sku) {
+                throw new Error('Each color must have name and SKU');
+              }
+
+              // Validate hex code if provided
+              if (color.hexCode && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color.hexCode)) {
+                throw new Error('Invalid color hex code format');
+              }
+
+              // Check if SKU already exists
+              const existingItem = await Item.findOne({
+                'variants.colors.sku': color.sku.toUpperCase()
+              });
+              if (existingItem) {
+                throw new Error(`SKU ${color.sku} already exists`);
+              }
+
+              // Process images for this color
+              let colorImages = [];
+              if (color.imageKeys && Array.isArray(color.imageKeys)) {
+                console.log(`Processing images for color: ${color.name}`);
+                // Find images by filename
+                const matchedImages = images.filter(file =>
+                  color.imageKeys.includes(file.originalname)
+                );
+                if (matchedImages.length === 0) {
+                  console.log(`Warning: No matching images found for color ${color.name}`);
+                } else {
+                  console.log(`Found ${matchedImages.length} images for color ${color.name}:`, matchedImages.map(f => f.originalname));
+                  // Upload images to S3
+                  const imageUrls = await uploadMultipleImagesToS3(matchedImages, 'items/variants');
+                  colorImages = imageUrls;
+                }
+              } else if (color.images && Array.isArray(color.images)) {
+                // If image URLs are provided directly
+                colorImages = color.images;
+              }
+
+              // Limit to 5 images per color
+              if (colorImages.length > 5) {
+                colorImages = colorImages.slice(0, 5);
+              }
+
+              processedColors.push({
+                name: color.name.trim(),
+                hexCode: color.hexCode || null,
+                images: colorImages,
+                sku: color.sku.toUpperCase().trim(),
+                stock: color.stock ? parseInt(color.stock) : 0
+              });
+            }
+
+            processedVariants.push({
+              size: variant.size.trim(),
+              colors: processedColors
+            });
+          }
+        }
+
+        // Process key highlights if provided
+        let processedKeyHighlights = [];
+        if (itemData.keyHighlights && Array.isArray(itemData.keyHighlights)) {
+          for (const highlight of itemData.keyHighlights) {
+            if (!highlight.key || !highlight.value) {
+              throw new Error('Each key highlight must have key and value');
+            }
+            if (highlight.key.length > 100 || highlight.value.length > 200) {
+              throw new Error('Key highlight key or value exceeds maximum length');
+            }
+            processedKeyHighlights.push({
+              key: highlight.key.trim(),
+              value: highlight.value.trim()
+            });
+          }
+        }
+
+        // Create new item
+        const item = new Item({
+          name: itemData.name.trim(),
+          description: itemData.description ? itemData.description.trim() : '',
+          price: price,
+          discountPrice: discountPrice,
+          discountPercentage: discountPercentage,
+          thumbnailImage: thumbnailImageUrl,
+          keyHighlights: processedKeyHighlights,
+          variants: processedVariants
+        });
+
+        await item.save();
+        console.log(`Item ${i + 1} created successfully:`, item._id);
+        
+        results.successful.push({
+          index: i,
+          name: itemData.name,
+          id: item._id,
+          message: 'Item created successfully'
+        });
+
+      } catch (itemError) {
+        console.error(`Item ${i + 1} failed:`, itemError.message);
+        results.failed.push({
+          index: i,
+          name: itemData.name || 'Unnamed item',
+          error: itemError.message
+        });
+      }
+    }
+
+    console.log('Bulk upload completed. Successful:', results.successful.length, 'Failed:', results.failed.length);
+
+    res.status(200).json(
+      apiResponse(200, true, 'Bulk upload completed', {
+        totalProcessed: results.totalProcessed,
+        successful: results.successful,
+        failed: results.failed,
+        summary: {
+          successCount: results.successful.length,
+          failureCount: results.failed.length,
+          successRate: ((results.successful.length / results.totalProcessed) * 100).toFixed(2) + '%'
+        }
+      })
+    );
+
+  } catch (error) {
+    console.error('Bulk upload error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to process bulk upload', { error: error.message })
+    );
+  }
+};
+
 module.exports = {
   createItem,
   getAllItems,
@@ -991,5 +1259,6 @@ module.exports = {
   getItemsByPriceRange,
   getDiscountedItems,
   searchItems,
-  uploadVariantImages
+  uploadVariantImages,
+  bulkUploadItems
 };

@@ -1,0 +1,573 @@
+{
+  "info": {
+    "name": "Bulk Upload API",
+    "_postman_id": "8c9a4f3d-1e3e-5c9g-b7c8-6f5e4d3c2b1a",
+    "description": "Postman collection for testing the bulk upload API endpoint for items in an e-commerce application.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Bulk Upload Items",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success true', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response contains bulk upload data', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('totalProcessed');",
+              "    pm.expect(jsonData.data).to.have.property('successful');",
+              "    pm.expect(jsonData.data).to.have.property('failed');",
+              "    pm.expect(jsonData.data).to.have.property('summary');",
+              "});",
+              "",
+              "pm.test('Summary contains correct counts', function () {",
+              "    var jsonData = pm.response.json();",
+              "    var summary = jsonData.data.summary;",
+              "    pm.expect(summary).to.have.property('successCount');",
+              "    pm.expect(summary).to.have.property('failureCount');",
+              "    pm.expect(summary).to.have.property('successRate');",
+              "});",
+              "",
+              "pm.test('Successful items are processed correctly', function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.data.successful.length > 0) {",
+              "        var successfulItem = jsonData.data.successful[0];",
+              "        pm.expect(successfulItem).to.have.property('index');",
+              "        pm.expect(successfulItem).to.have.property('name');",
+              "        pm.expect(successfulItem).to.have.property('id');",
+              "        pm.expect(successfulItem).to.have.property('message');",
+              "        pm.expect(successfulItem.message).to.equal('Item created successfully');",
+              "    }",
+              "});",
+              "",
+              "pm.test('Failed items have error details', function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.data.failed.length > 0) {",
+              "        var failedItem = jsonData.data.failed[0];",
+              "        pm.expect(failedItem).to.have.property('index');",
+              "        pm.expect(failedItem).to.have.property('name');",
+              "        pm.expect(failedItem).to.have.property('error');",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "jsonFile",
+              "type": "file",
+              "src": "path/to/bulk-upload-demo.json",
+              "description": "JSON file containing item data for bulk upload"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/thumbnail.jpg",
+              "description": "Thumbnail image for the item"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/red-front.PNG",
+              "description": "Red T-shirt front view"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/red-back.PNG",
+              "description": "Red T-shirt back view"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/blue-front.PNG",
+              "description": "Blue T-shirt front view"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/blue-back.PNG",
+              "description": "Blue T-shirt back view"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/items/bulk-upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["items", "bulk-upload"]
+        },
+        "description": "Upload multiple items at once using a JSON file and associated images. This endpoint supports up to 25 images and 100 items per bulk upload."
+      },
+      "response": []
+    },
+    {
+      "name": "Bulk Upload - Multiple Items",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Multiple items are processed', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data.totalProcessed).to.be.greaterThan(1);",
+              "});",
+              "",
+              "pm.test('Success rate calculation is correct', function () {",
+              "    var jsonData = pm.response.json();",
+              "    var summary = jsonData.data.summary;",
+              "    var expectedRate = ((summary.successCount / jsonData.data.totalProcessed) * 100).toFixed(2) + '%';",
+              "    pm.expect(summary.successRate).to.equal(expectedRate);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "jsonFile",
+              "type": "file",
+              "src": "path/to/multiple-items.json",
+              "description": "JSON file containing multiple items for bulk upload"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/item1-thumbnail.jpg",
+              "description": "Thumbnail for item 1"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/item1-image1.jpg",
+              "description": "Image 1 for item 1"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/item2-thumbnail.jpg",
+              "description": "Thumbnail for item 2"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/item2-image1.jpg",
+              "description": "Image 1 for item 2"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/items/bulk-upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["items", "bulk-upload"]
+        },
+        "description": "Test bulk upload with multiple items to verify batch processing capabilities."
+      },
+      "response": []
+    },
+    {
+      "name": "Bulk Upload - Validation Error",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400 for validation error', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Response indicates validation failure', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});",
+              "",
+              "pm.test('Error message is descriptive', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('required');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "jsonFile",
+              "type": "file",
+              "src": "path/to/invalid-items.json",
+              "description": "JSON file with missing required fields to test validation"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/items/bulk-upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["items", "bulk-upload"]
+        },
+        "description": "Test bulk upload validation by sending a JSON file with missing required fields."
+      },
+      "response": []
+    },
+    {
+      "name": "Bulk Upload - Too Many Images",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400 for too many images', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error message mentions image limit', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('25');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "jsonFile",
+              "type": "file",
+              "src": "path/to/valid-items.json",
+              "description": "Valid JSON file"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image1.jpg",
+              "description": "Image 1"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image2.jpg",
+              "description": "Image 2"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image3.jpg",
+              "description": "Image 3"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image4.jpg",
+              "description": "Image 4"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image5.jpg",
+              "description": "Image 5"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image6.jpg",
+              "description": "Image 6"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image7.jpg",
+              "description": "Image 7"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image8.jpg",
+              "description": "Image 8"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image9.jpg",
+              "description": "Image 9"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image10.jpg",
+              "description": "Image 10"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image11.jpg",
+              "description": "Image 11"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image12.jpg",
+              "description": "Image 12"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image13.jpg",
+              "description": "Image 13"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image14.jpg",
+              "description": "Image 14"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image15.jpg",
+              "description": "Image 15"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image16.jpg",
+              "description": "Image 16"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image17.jpg",
+              "description": "Image 17"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image18.jpg",
+              "description": "Image 18"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image19.jpg",
+              "description": "Image 19"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image20.jpg",
+              "description": "Image 20"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image21.jpg",
+              "description": "Image 21"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image22.jpg",
+              "description": "Image 22"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image23.jpg",
+              "description": "Image 23"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image24.jpg",
+              "description": "Image 24"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image25.jpg",
+              "description": "Image 25"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/image26.jpg",
+              "description": "Image 26 (exceeds limit)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/items/bulk-upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["items", "bulk-upload"]
+        },
+        "description": "Test bulk upload with more than 25 images to verify the image limit validation."
+      },
+      "response": []
+    },
+    {
+      "name": "Bulk Upload - Unauthorized",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401 for unauthorized access', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('Response indicates authentication failure', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "jsonFile",
+              "type": "file",
+              "src": "path/to/bulk-upload-demo.json",
+              "description": "Valid JSON file"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "path/to/thumbnail.jpg",
+              "description": "Thumbnail image"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/items/bulk-upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["items", "bulk-upload"]
+        },
+        "description": "Test bulk upload without authentication token to verify access control."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "description": "Base URL of the API"
+    },
+    {
+      "key": "adminToken",
+      "value": "your_admin_jwt_token_here",
+      "description": "JWT token for admin authentication"
+    }
+  ]
+}

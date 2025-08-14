@@ -15,7 +15,8 @@ const {
   getItemsByPriceRange,
   getDiscountedItems,
   searchItems,
-  uploadVariantImages
+  uploadVariantImages,
+  bulkUploadItems
 } = require('../controllers/itemController');
 const { verifyAuth } = require('../middleware/auth');
 
@@ -50,6 +51,32 @@ const uploadMultiple = multer({
   },
 });
 
+// Configure multer for bulk upload (JSON file + multiple images)
+const uploadBulk = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit per file
+    files: 26 // Maximum 26 files (1 JSON + 25 images)
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === 'jsonFile') {
+      if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+        cb(null, true);
+      } else {
+        cb(new Error('JSON file must be a valid JSON file'), false);
+      }
+    } else if (file.fieldname === 'images') {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    } else {
+      cb(new Error('Invalid field name'), false);
+    }
+  },
+});
+
 // Public routes (no authentication required)
 router.get('/search', searchItems);
 router.get('/price-range', getItemsByPriceRange);
@@ -74,5 +101,11 @@ router.post('/:id/variant-images', verifyAuth(['admin']), uploadMultiple.array('
 router.post('/:id/key-highlights', verifyAuth(['admin']), addKeyHighlight);
 router.put('/:id/key-highlights', verifyAuth(['admin']), updateKeyHighlight);
 router.delete('/:id/key-highlights', verifyAuth(['admin']), removeKeyHighlight);
+
+// Bulk upload route (admin only)
+router.post('/bulk-upload', verifyAuth(['admin']), uploadBulk.fields([
+  { name: 'jsonFile', maxCount: 1 },
+  { name: 'images', maxCount: 25 }
+]), bulkUploadItems);
 
 module.exports = router;
