@@ -3,10 +3,11 @@ const { uploadImageToS3, deleteFromS3, uploadMultipleImagesToS3 } = require('../
 const { apiResponse } = require('../utils/apiResponse');
 
 // Create new item
+// Create new item
 const createItem = async (req, res) => {
   console.log('=== createItem called ===');
   console.log('Request body:', req.body);
-  console.log('Thumbnail image:', req.file ? 'Present' : 'Not present');
+  console.log('Files:', req.files);
   
   try {
     const { 
@@ -18,9 +19,15 @@ const createItem = async (req, res) => {
       keyHighlights,
       variants 
     } = req.body;
-    const thumbnailImage = req.file;
+    
+    const thumbnailImage = req.files?.thumbnailImage?.[0];
+    const variantImages = req.files?.variantImages || [];
+    
     console.log('Extracted data - name:', name, 'price:', price, 'discountPrice:', discountPrice, 'discountPercentage:', discountPercentage);
+    console.log('Thumbnail image:', thumbnailImage ? 'Present' : 'Not present');
+    console.log('Variant images count:', variantImages.length);
 
+    // Validate required fields
     if (!name || !price || !thumbnailImage) {
       console.log('Validation failed: Missing required fields');
       return res.status(400).json(
@@ -28,25 +35,41 @@ const createItem = async (req, res) => {
       );
     }
 
-    if (price < 0) {
-      console.log('Validation failed: Negative price');
+    // Validate numeric fields
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      console.log('Validation failed: Invalid or negative price');
       return res.status(400).json(
-        apiResponse(400, false, 'Price cannot be negative')
+        apiResponse(400, false, 'Price must be a valid non-negative number')
       );
     }
 
-    if (discountPrice && discountPrice >= price) {
-      console.log('Validation failed: Invalid discount price');
-      return res.status(400).json(
-        apiResponse(400, false, 'Discount price must be less than original price')
-      );
+    let parsedDiscountPrice = 0;
+    if (discountPrice) {
+      parsedDiscountPrice = parseFloat(discountPrice);
+      if (isNaN(parsedDiscountPrice) || parsedDiscountPrice < 0) {
+        console.log('Validation failed: Invalid discount price');
+        return res.status(400).json(
+          apiResponse(400, false, 'Discount price must be a valid non-negative number')
+        );
+      }
+      if (parsedDiscountPrice >= parsedPrice) {
+        console.log('Validation failed: Invalid discount price');
+        return res.status(400).json(
+          apiResponse(400, false, 'Discount price must be less than original price')
+        );
+      }
     }
 
-    if (discountPercentage && (discountPercentage < 0 || discountPercentage > 100)) {
-      console.log('Validation failed: Invalid discount percentage');
-      return res.status(400).json(
-        apiResponse(400, false, 'Discount percentage must be between 0 and 100')
-      );
+    let parsedDiscountPercentage = 0;
+    if (discountPercentage) {
+      parsedDiscountPercentage = parseFloat(discountPercentage);
+      if (isNaN(parsedDiscountPercentage) || parsedDiscountPercentage < 0 || parsedDiscountPercentage > 100) {
+        console.log('Validation failed: Invalid discount percentage');
+        return res.status(400).json(
+          apiResponse(400, false, 'Discount percentage must be between 0 and 100')
+        );
+      }
     }
 
     console.log('Input validation passed');
@@ -56,18 +79,166 @@ const createItem = async (req, res) => {
     const thumbnailImageUrl = await uploadImageToS3(thumbnailImage, 'items/thumbnails');
     console.log('Thumbnail image uploaded to S3:', thumbnailImageUrl);
 
-    // Create new item
+    // Process variants if provided
+    let processedVariants = [];
+    if (variants) {
+      console.log('Processing variants...');
+      
+      let variantsData = variants;
+      if (typeof variants === 'string') {
+        try {
+          variantsData = JSON.parse(variants);
+        } catch (e) {
+          console.log('Failed to parse variants JSON:', e);
+          return res.status(400).json(
+            apiResponse(400, false, 'Invalid variants JSON format')
+          );
+        }
+      }
+
+      if (!Array.isArray(variantsData)) {
+        console.log('Validation failed: Variants must be an array');
+        return res.status(400).json(
+          apiResponse(400, false, 'Variants must be an array')
+        );
+      }
+
+      for (const variant of variantsData) {
+        if (!variant.size || !variant.colors || !Array.isArray(variant.colors)) {
+          console.log('Validation failed: Invalid variant structure');
+          return res.status(400).json(
+            apiResponse(400, false, 'Each variant must have size and colors array')
+          );
+        }
+
+        const processedColors = [];
+        for (const color of variant.colors) {
+          if (!color.name || !color.sku) {
+            console.log('Validation failed: Missing color name or SKU');
+            return res.status(400).json(
+              apiResponse(400, false, 'Each color must have name and SKU')
+            );
+          }
+
+          // Validate hex code if provided
+          if (color.hexCode && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color.hexCode)) {
+            console.log('Validation failed: Invalid hex code');
+            return res.status(400).json(
+              apiResponse(400, false, 'Invalid color hex code format')
+            );
+          }
+
+          // Check if SKU already exists
+          const existingItem = await Item.findOne({
+            'variants.colors.sku': color.sku
+          });
+          if (existingItem) {
+            console.log('Validation failed: SKU already exists:', color.sku);
+            return res.status(400).json(
+              apiResponse(400, false, `SKU ${color.sku} already exists`)
+            );
+          }
+
+          // Process images for this specific color
+          let colorImages = [];
+          if (color.imageKeys && Array.isArray(color.imageKeys) && variantImages.length > 0) {
+            console.log(`Processing images for color: ${color.name}`);
+            // Filter variantImages that match the provided imageKeys
+            const matchedImages = variantImages.filter(file =>
+              color.imageKeys.includes(file.originalname)
+            );
+            if (matchedImages.length === 0) {
+              console.log(`Warning: No matching images found for color ${color.name}`);
+            } 
+            if (matchedImages.length > 0) {
+              colorImages = await uploadMultipleImagesToS3(matchedImages, 'items/variants');
+            }
+          }
+
+          const processedColor = {
+            name: color.name.trim(),
+            hexCode: color.hexCode || null,
+            images: colorImages,
+            sku: color.sku.toUpperCase().trim(),
+            stock: color.stock ? parseInt(color.stock) : 0
+          };
+
+          // Validate stock
+          if (processedColor.stock < 0) {
+            console.log('Validation failed: Negative stock');
+            return res.status(400).json(
+              apiResponse(400, false, 'Stock cannot be negative')
+            );
+          }
+
+          processedColors.push(processedColor);
+        }
+
+        processedVariants.push({
+          size: variant.size.trim(),
+          colors: processedColors
+        });
+      }
+    }
+
+    // Process key highlights if provided
+    let processedKeyHighlights = [];
+    if (keyHighlights) {
+      console.log('Processing key highlights...');
+      
+      let highlightsData = keyHighlights;
+      if (typeof keyHighlights === 'string') {
+        try {
+          highlightsData = JSON.parse(keyHighlights);
+        } catch (e) {
+          console.log('Failed to parse keyHighlights JSON:', e);
+          return res.status(400).json(
+            apiResponse(400, false, 'Invalid keyHighlights JSON format')
+          );
+        }
+      }
+
+      if (!Array.isArray(highlightsData)) {
+        console.log('Validation failed: Key highlights must be an array');
+        return res.status(400).json(
+          apiResponse(400, false, 'Key highlights must be an array')
+        );
+      }
+
+      for (const highlight of highlightsData) {
+        if (!highlight.key || !highlight.value) {
+          console.log('Validation failed: Invalid key highlight structure');
+          return res.status(400).json(
+            apiResponse(400, false, 'Each key highlight must have key and value')
+          );
+        }
+        if (highlight.key.length > 100 || highlight.value.length > 200) {
+          console.log('Validation failed: Key highlight length exceeded');
+          return res.status(400).json(
+            apiResponse(400, false, 'Key highlight key or value exceeds maximum length')
+          );
+        }
+        processedKeyHighlights.push({
+          key: highlight.key.trim(),
+          value: highlight.value.trim()
+        });
+      }
+    }
+
+    // Create new item with complete structure
     const item = new Item({
-      name,
-      description,
-      price,
-      discountPrice: discountPrice || 0,
-      discountPercentage: discountPercentage || 0,
+      name: name.trim(),
+      description: description ? description.trim() : '',
+      price: parsedPrice,
+      discountPrice: parsedDiscountPrice,
+      discountPercentage: parsedDiscountPercentage,
       thumbnailImage: thumbnailImageUrl,
-      keyHighlights: keyHighlights || [],
-      variants: variants || []
+      keyHighlights: processedKeyHighlights,
+      variants: processedVariants,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
-    console.log('New item instance created:', item);
+    console.log('New item instance created with complete structure:', item);
 
     await item.save();
     console.log('Item saved successfully:', item._id);
@@ -78,8 +249,16 @@ const createItem = async (req, res) => {
 
   } catch (error) {
     console.error('Create item error:', error);
+    
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json(
+        apiResponse(400, false, 'Validation failed', { errors: validationErrors })
+      );
+    }
+    
     res.status(500).json(
-      apiResponse(500, false, 'Failed to create item')
+      apiResponse(500, false, 'Failed to create item', { error: error.message })
     );
   }
 };

@@ -64,8 +64,7 @@ const itemSchema = new mongoose.Schema({
       },
       images: [{
         type: String,
-        maxlength: 5
-      }],
+       }],
       sku: {
         type: String,
         required: true,

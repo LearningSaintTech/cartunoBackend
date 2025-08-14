@@ -26,7 +26,6 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    // Allow only image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
@@ -40,10 +39,9 @@ const uploadMultiple = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit per file
-    files: 5 // Maximum 5 files
+    files: 25 // Maximum 25 files (5 variants × 5 colors × 5 images max)
   },
   fileFilter: (req, file, cb) => {
-    // Allow only image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
@@ -59,7 +57,10 @@ router.get('/discounted', getDiscountedItems);
 router.get('/:id', getItemById);
 
 // Protected routes (admin authentication required)
-router.post('/', verifyAuth(['admin']), upload.single('thumbnailImage'), createItem);
+router.post('/', verifyAuth(['admin']), uploadMultiple.fields([
+  { name: 'thumbnailImage', maxCount: 1 },
+  { name: 'variantImages', maxCount: 25 }
+]), createItem);
 router.get('/', getAllItems);
 router.put('/:id', verifyAuth(['admin']), upload.single('thumbnailImage'), updateItem);
 router.delete('/:id', verifyAuth(['admin']), deleteItem);
