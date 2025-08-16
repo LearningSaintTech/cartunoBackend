@@ -1525,6 +1525,7 @@ const bulkUploadItems = async (req, res) => {
   console.log('Files received:', req.files);
   console.log('Body:', req.body);
   
+  
   try {
     const jsonFile = req.files?.jsonFile?.[0];
     const images = req.files?.images || [];
