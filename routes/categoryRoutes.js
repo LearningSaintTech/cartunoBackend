@@ -31,6 +31,7 @@ const upload = multer({
 
 // Public routes (no authentication required)
 router.get('/active', getActiveCategories);
+router.get('/all', getAllCategories);
 router.get('/search', searchCategories);
 
 // Protected routes (admin authentication required)

@@ -16,6 +16,8 @@ The request should be a `multipart/form-data` with the following fields:
 
 1. **`jsonFile`** (required): A JSON file containing an array of items
 2. **`images`** (optional): Up to 25 image files
+3. **`categoryId`** (required): MongoDB ObjectId of the category
+4. **`subcategoryId`** (required): MongoDB ObjectId of the subcategory
 
 ## JSON File Structure
 
@@ -57,6 +59,8 @@ The JSON file should contain an array of item objects. Each item object should f
 #### Required Fields
 - **`name`**: Item name (max 200 characters)
 - **`price`**: Item price (must be positive number)
+- **`categoryId`**: MongoDB ObjectId of the category (sent in request body)
+- **`subcategoryId`**: MongoDB ObjectId of the subcategory (sent in request body)
 
 #### Optional Fields
 - **`description`**: Item description (max 2000 characters)
@@ -99,8 +103,9 @@ curl -X POST \
   -F "jsonFile=@items.json" \
   -F "images=@image1.jpg" \
   -F "images=@image2.jpg" \
-  -F "images=@image3.jpg" \
-  http://localhost:3000/api/items/bulk-upload
+  -F "categoryId=507f1f77bcf86cd799439011" \
+  -F "subcategoryId=507f1f77bcf86cd799439012" \
+  http://localhost:5000/api/items/bulk-upload
 ```
 
 ### JavaScript Example
@@ -110,7 +115,8 @@ const formData = new FormData();
 formData.append('jsonFile', jsonFile);
 formData.append('images', image1);
 formData.append('images', image2);
-formData.append('images', image3);
+formData.append('categoryId', '507f1f77bcf86cd799439011');
+formData.append('subcategoryId', '507f1f77bcf86cd799439012');
 
 const response = await fetch('/api/items/bulk-upload', {
   method: 'POST',
@@ -119,8 +125,6 @@ const response = await fetch('/api/items/bulk-upload', {
   },
   body: formData
 });
-
-const result = await response.json();
 ```
 
 ## Response Format

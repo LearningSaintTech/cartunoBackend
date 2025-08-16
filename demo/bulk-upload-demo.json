@@ -1,19 +1,37 @@
 [
   {
-    "name": "T-Shirt",
-    "description": "Comfortable cotton T-shirt",
-    "price": 29.99,
-    "discountPrice": 24.99,
-    "discountPercentage": 15,
+    "name": "Item Name",
+    "description": "Item description",
+    "price": 99.99,
+    "discountPrice": 79.99,
+    "discountPercentage": 20,
     "thumbnailImageKey": "thumbnail.PNG",
+    "filters": [
+      {
+        "key": "brand",
+        "values": ["Nike", "Adidas", "Puma"],
+        "displayValues": ["Nike", "Adidas", "Puma"]
+      },
+      {
+        "key": "material",
+        "values": ["cotton", "polyester", "wool"],
+        "displayValues": ["Cotton", "Polyester", "Wool"]
+      },
+      {
+        "key": "style",
+        "values": ["casual", "formal", "sporty"],
+        "displayValues": ["Casual", "Formal", "Sporty"]
+      },
+      {
+        "key": "season",
+        "values": ["summer", "winter", "all-season"],
+        "displayValues": ["Summer", "Winter", "All Season"]
+      }
+    ],
     "keyHighlights": [
       {
         "key": "Material",
-        "value": "100% Cotton"
-      },
-      {
-        "key": "Fit",
-        "value": "Regular"
+        "value": "Premium cotton"
       }
     ],
     "variants": [
@@ -21,18 +39,11 @@
         "size": "M",
         "colors": [
           {
-            "name": "Red",
-            "sku": "TSHIRT-M-RED",
-            "hexCode": "#FF0000",
-            "stock": 10,
-            "imageKeys": ["red-front.PNG", "red-back.PNG"]
-          },
-          {
             "name": "Blue",
-            "sku": "TSHIRT-M-BLUE",
             "hexCode": "#0000FF",
-            "stock": 15,
-            "imageKeys": ["blue-front.PNG", "blue-back.PNG"]
+            "imageKeys": ["blue-front.jpg", "blue-back.jpg", "blue-side.jpg"],
+            "sku": "ITEM1-M-BLUE",
+            "stock": 50
           }
         ]
       }

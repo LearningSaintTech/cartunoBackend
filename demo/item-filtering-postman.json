@@ -1,0 +1,284 @@
+{
+  "info": {
+    "name": "Cartuno Item Filtering API",
+    "description": "Collection for testing the enhanced item filtering system with JSON body",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Item Filtering",
+      "item": [
+        {
+          "name": "Get All Items (No Filters)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20,\n  \"sortBy\": \"createdAt\",\n  \"sortOrder\": -1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Get all items without any filters (initial page load)"
+          }
+        },
+        {
+          "name": "Basic Category Filtering",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 15,\n  \"categoryId\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n  \"subcategoryId\": \"64f8a1b2c3d4e5f6a7b8c9d1\",\n  \"sortBy\": \"name\",\n  \"sortOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Filter items by category and subcategory"
+          }
+        },
+        {
+          "name": "Price Range Filtering",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 25,\n  \"minPrice\": 50,\n  \"maxPrice\": 200,\n  \"hasDiscount\": true,\n  \"sortBy\": \"price\",\n  \"sortOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Filter items by price range and show only discounted items"
+          }
+        },
+        {
+          "name": "Search with Filters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20,\n  \"search\": \"cotton shirt\",\n  \"categoryId\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n  \"filters\": {\n    \"brand\": [\"Nike\", \"Adidas\"],\n    \"size\": [\"M\", \"L\", \"XL\"],\n    \"color\": [\"blue\", \"black\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Search for items with text and apply multiple filters"
+          }
+        },
+        {
+          "name": "Complex Multi-Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 30,\n  \"sortBy\": \"price\",\n  \"sortOrder\": -1,\n  \"minPrice\": 100,\n  \"maxPrice\": 500,\n  \"categoryId\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n  \"hasDiscount\": true,\n  \"filters\": {\n    \"brand\": [\"Nike\", \"Adidas\", \"Puma\"],\n    \"material\": [\"cotton\", \"polyester\"],\n    \"size\": [\"S\", \"M\", \"L\", \"XL\"],\n    \"color\": [\"blue\", \"black\", \"white\", \"red\"],\n    \"style\": [\"casual\", \"sports\"],\n    \"season\": [\"summer\", \"winter\"],\n    \"fit\": [\"regular\", \"slim\"],\n    \"pattern\": [\"solid\", \"striped\"],\n    \"sleeve\": [\"short\", \"long\"],\n    \"neckline\": [\"round\", \"v-neck\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Complex filtering with multiple criteria and price range"
+          }
+        },
+        {
+          "name": "Gender and Age Filtering",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 25,\n  \"categoryId\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n  \"sortBy\": \"name\",\n  \"sortOrder\": 1,\n  \"filters\": {\n    \"gender\": [\"men\", \"women\"],\n    \"age_group\": [\"adult\", \"teen\"],\n    \"occasion\": [\"casual\", \"formal\", \"party\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Filter items by gender, age group, and occasion"
+          }
+        },
+        {
+          "name": "Trending Items Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 15,\n  \"sortBy\": \"updatedAt\",\n  \"sortOrder\": -1,\n  \"filters\": {\n    \"trending\": [\"true\"],\n    \"categoryId\": \"64f8a1b2c3d4e5f6a7b8c9d0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Get trending items within a specific category"
+          }
+        },
+        {
+          "name": "Stock Availability Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 20,\n  \"filters\": {\n    \"availability\": [\"in_stock\", \"low_stock\"],\n    \"brand\": [\"Nike\", \"Adidas\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/items/filter",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filter"]
+            },
+            "description": "Filter items based on stock availability and brand"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Other Item Endpoints",
+      "item": [
+        {
+          "name": "Get Available Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/items/filters/available?categoryId=64f8a1b2c3d4e5f6a7b8c9d0",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "filters", "available"],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "64f8a1b2c3d4e5f6a7b8c9d0"
+                }
+              ]
+            },
+            "description": "Get available filter options for a specific category"
+          }
+        },
+        {
+          "name": "Search Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/items/search?q=cotton&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "cotton"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search items by text query"
+          }
+        },
+        {
+          "name": "Get Items by Price Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/items/price-range?minPrice=50&maxPrice=200",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "price-range"],
+              "query": [
+                {
+                  "key": "minPrice",
+                  "value": "50"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "200"
+                }
+              ]
+            },
+            "description": "Get items within a specific price range"
+          }
+        },
+        {
+          "name": "Get Discounted Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/items/discounted",
+              "host": ["{{baseUrl}}"],
+              "path": ["items", "discounted"]
+            },
+            "description": "Get all items with discounts"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ]
+}

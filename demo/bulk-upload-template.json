@@ -1,87 +1,64 @@
 [
   {
-    "name": "Sample Item 1",
-    "description": "This is a sample item description",
-    "price": 99.99,
-    "discountPrice": 79.99,
-    "discountPercentage": 20,
-    "thumbnailImageIndex": 0,
-    "keyHighlights": [
+    "name": "Product Name",
+    "description": "Product description",
+    "price": 0.00,
+    "discountPrice": 0.00,
+    "discountPercentage": 0,
+    "thumbnailImageKey": "thumbnail.jpg",
+    "filters": [
       {
-        "key": "Material",
-        "value": "Premium cotton"
+        "key": "brand",
+        "values": ["brand1", "brand2"],
+        "displayValues": ["Brand 1", "Brand 2"]
       },
       {
-        "key": "Care",
-        "value": "Machine washable"
+        "key": "material",
+        "values": ["cotton", "polyester"],
+        "displayValues": ["Cotton", "Polyester"]
+      },
+      {
+        "key": "style",
+        "values": ["casual", "formal"],
+        "displayValues": ["Casual", "Formal"]
+      },
+      {
+        "key": "season",
+        "values": ["summer", "winter"],
+        "displayValues": ["Summer", "Winter"]
+      },
+      {
+        "key": "color_family",
+        "values": ["neutral", "bright", "dark"],
+        "displayValues": ["Neutral", "Bright", "Dark"]
+      },
+      {
+        "key": "fit",
+        "values": ["loose", "regular", "slim"],
+        "displayValues": ["Loose", "Regular", "Slim"]
+      },
+      {
+        "key": "occasion",
+        "values": ["everyday", "work", "party", "sports"],
+        "displayValues": ["Everyday", "Work", "Party", "Sports"]
+      }
+    ],
+    "keyHighlights": [
+      {
+        "key": "Feature 1",
+        "value": "Feature description"
       }
     ],
     "variants": [
       {
-        "size": "M",
+        "size": "S",
         "colors": [
           {
-            "name": "Blue",
-            "hexCode": "#0000FF",
-            "imageIndices": [1, 2, 3],
-            "sku": "ITEM1-M-BLUE",
-            "stock": 50
-          },
-          {
-            "name": "Red",
-            "hexCode": "#FF0000",
-            "imageIndices": [4, 5, 6],
-            "sku": "ITEM1-M-RED",
-            "stock": 30
-          }
-        ]
-      },
-      {
-        "size": "L",
-        "colors": [
-          {
-            "name": "Blue",
-            "hexCode": "#0000FF",
-            "imageIndices": [7, 8, 9],
-            "sku": "ITEM1-L-BLUE",
-            "stock": 40
-          },
-          {
-            "name": "Red",
-            "hexCode": "#FF0000",
-            "imageIndices": [10, 11, 12],
-            "sku": "ITEM1-L-RED",
-            "stock": 25
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Sample Item 2",
-    "description": "Another sample item with different structure",
-    "price": 149.99,
-    "thumbnailImageIndex": 13,
-    "keyHighlights": [
-      {
-        "key": "Brand",
-        "value": "Premium Brand"
-      },
-      {
-        "key": "Warranty",
-        "value": "2 years"
-      }
-    ],
-    "variants": [
-      {
-        "size": "One Size",
-        "colors": [
-          {
-            "name": "Black",
+            "name": "Color Name",
             "hexCode": "#000000",
-            "imageIndices": [14, 15],
-            "sku": "ITEM2-OS-BLACK",
-            "stock": 100
+            "imageKeys": ["image1.jpg", "image2.jpg"],
+            "sku": "PRODUCT-S-COLOR",
+            "stock": 0
           }
         ]
       }

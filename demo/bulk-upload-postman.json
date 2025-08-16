@@ -101,26 +101,26 @@
             {
               "key": "images",
               "type": "file",
-              "src": "path/to/red-front.PNG",
-              "description": "Red T-shirt front view"
+              "src": "path/to/variant1.jpg",
+              "description": "Variant image 1"
             },
             {
               "key": "images",
               "type": "file",
-              "src": "path/to/red-back.PNG",
-              "description": "Red T-shirt back view"
+              "src": "path/to/variant2.jpg",
+              "description": "Variant image 2"
             },
             {
-              "key": "images",
-              "type": "file",
-              "src": "path/to/blue-front.PNG",
-              "description": "Blue T-shirt front view"
+              "key": "categoryId",
+              "value": "507f1f77bcf86cd799439011",
+              "type": "text",
+              "description": "MongoDB ObjectId of the category"
             },
             {
-              "key": "images",
-              "type": "file",
-              "src": "path/to/blue-back.PNG",
-              "description": "Blue T-shirt back view"
+              "key": "subcategoryId",
+              "value": "507f1f77bcf86cd799439012",
+              "type": "text",
+              "description": "MongoDB ObjectId of the subcategory"
             }
           ]
         },

@@ -1,6 +1,7 @@
 const Item = require('../models/item');
 const { uploadImageToS3, deleteFromS3, uploadMultipleImagesToS3 } = require('../utils/s3Upload');
 const { apiResponse } = require('../utils/apiResponse');
+const mongoose = require('mongoose');
 
 // Create new item
 // Create new item
@@ -17,21 +18,38 @@ const createItem = async (req, res) => {
       discountPrice, 
       discountPercentage,
       keyHighlights,
-      variants 
+      variants,
+      categoryId,
+      subcategoryId
     } = req.body;
     
     const thumbnailImage = req.files?.thumbnailImage?.[0];
     const variantImages = req.files?.variantImages || [];
     
-    console.log('Extracted data - name:', name, 'price:', price, 'discountPrice:', discountPrice, 'discountPercentage:', discountPercentage);
+    console.log('Extracted data - name:', name, 'price:', price, 'discountPrice:', discountPrice, 'discountPercentage:', discountPercentage, 'categoryId:', categoryId, 'subcategoryId:', subcategoryId);
     console.log('Thumbnail image:', thumbnailImage ? 'Present' : 'Not present');
     console.log('Variant images count:', variantImages.length);
 
     // Validate required fields
-    if (!name || !price || !thumbnailImage) {
+    if (!name || !price || !thumbnailImage || !categoryId || !subcategoryId) {
       console.log('Validation failed: Missing required fields');
       return res.status(400).json(
-        apiResponse(400, false, 'Name, price, and thumbnail image are required')
+        apiResponse(400, false, 'Name, price, thumbnail image, category ID, and subcategory ID are required')
+      );
+    }
+
+    // Validate ObjectId format for category and subcategory
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      console.log('Validation failed: Invalid category ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid category ID format')
+      );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      console.log('Validation failed: Invalid subcategory ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid subcategory ID format')
       );
     }
 
@@ -141,10 +159,10 @@ const createItem = async (req, res) => {
 
           // Process images for this specific color
           let colorImages = [];
-          if (color.imageKeys && Array.isArray(color.imageKeys) && images.length > 0) {
+          if (color.imageKeys && Array.isArray(color.imageKeys) && variantImages.length > 0) {
             console.log(`Processing images for color: ${color.name}`);
             // Filter images that match the provided imageKeys
-            const matchedImages = images.filter(file =>
+            const matchedImages = variantImages.filter(file =>
               color.imageKeys.includes(file.originalname)
             );
             if (matchedImages.length === 0) {
@@ -225,6 +243,76 @@ const createItem = async (req, res) => {
       }
     }
 
+    // Process filters if provided
+    let processedFilters = [];
+    if (req.body.filters) {
+      console.log('Processing filters...');
+      
+      let filtersData = req.body.filters;
+      if (typeof req.body.filters === 'string') {
+        try {
+          filtersData = JSON.parse(req.body.filters);
+        } catch (e) {
+          console.log('Failed to parse filters JSON:', e);
+          return res.status(400).json(
+            apiResponse(400, false, 'Invalid filters JSON format')
+          );
+        }
+      }
+
+      if (!Array.isArray(filtersData)) {
+        console.log('Validation failed: Filters must be an array');
+        return res.status(400).json(
+          apiResponse(400, false, 'Filters must be an array')
+        );
+      }
+
+      for (const filter of filtersData) {
+        if (!filter.key || !filter.values || !Array.isArray(filter.values) || filter.values.length === 0) {
+          console.log('Validation failed: Invalid filter structure');
+          return res.status(400).json(
+            apiResponse(400, false, 'Each filter must have key and values array')
+          );
+        }
+        if (filter.key.length > 100) {
+          console.log('Validation failed: Filter key length exceeded');
+          return res.status(400).json(
+            apiResponse(400, false, 'Filter key exceeds maximum length')
+          );
+        }
+        
+        // Validate filter values
+        const validValues = filter.values.filter(value => 
+          value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100
+        );
+        
+        if (validValues.length === 0) {
+          console.log('Validation failed: No valid filter values');
+          return res.status(400).json(
+            apiResponse(400, false, 'Each filter must have at least one valid value')
+          );
+        }
+
+        // Process display values if provided
+        let displayValues = validValues;
+        if (filter.displayValues && Array.isArray(filter.displayValues)) {
+          displayValues = filter.displayValues.filter((value, index) => 
+            value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100 && index < validValues.length
+          );
+          // Ensure displayValues has same length as values
+          while (displayValues.length < validValues.length) {
+            displayValues.push(validValues[displayValues.length]);
+          }
+        }
+
+        processedFilters.push({
+          key: filter.key.trim(),
+          values: validValues.map(v => v.trim()),
+          displayValues: displayValues.map(v => v.trim())
+        });
+      }
+    }
+
     // Create new item with complete structure
     const item = new Item({
       name: name.trim(),
@@ -233,8 +321,11 @@ const createItem = async (req, res) => {
       discountPrice: parsedDiscountPrice,
       discountPercentage: parsedDiscountPercentage,
       thumbnailImage: thumbnailImageUrl,
+      categoryId: categoryId,
+      subcategoryId: subcategoryId,
       keyHighlights: processedKeyHighlights,
       variants: processedVariants,
+      filters: processedFilters,
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -263,9 +354,10 @@ const createItem = async (req, res) => {
   }
 };
 
-// Get all items
+// Get all items with advanced filtering (POST method for complex filters)
 const getAllItems = async (req, res) => {
   console.log('=== getAllItems called ===');
+  console.log('Request body:', req.body);
   console.log('Query parameters:', req.query);
   
   try {
@@ -276,51 +368,102 @@ const getAllItems = async (req, res) => {
       sortOrder = -1, 
       minPrice, 
       maxPrice,
-      hasDiscount 
-    } = req.query;
-    console.log('Parsed parameters - page:', page, 'limit:', limit, 'sortBy:', sortBy, 'sortOrder:', sortOrder, 'minPrice:', minPrice, 'maxPrice:', maxPrice, 'hasDiscount:', hasDiscount);
-
-    // Build query
-    const query = {};
+      hasDiscount,
+      search,
+      categoryId,
+      subcategoryId,
+      filters = {} // Extract filters from request body
+    } = req.body;
     
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) {
-        query.price.$gte = parseFloat(minPrice);
-        console.log('Added min price filter:', minPrice);
-      }
-      if (maxPrice) {
-        query.price.$lte = parseFloat(maxPrice);
-        console.log('Added max price filter:', maxPrice);
+    console.log('Parsed parameters - page:', page, 'limit:', limit, 'sortBy:', sortBy, 'sortOrder:', sortOrder, 'minPrice:', minPrice, 'maxPrice:', maxPrice, 'hasDiscount:', hasDiscount, 'search:', search, 'categoryId:', categoryId, 'subcategoryId:', subcategoryId);
+    console.log('Filters from body:', filters);
+
+    // Validate filters structure
+    if (filters && typeof filters === 'object') {
+      for (const [key, values] of Object.entries(filters)) {
+        if (!Array.isArray(values) || values.length === 0) {
+          console.log('Validation failed: Filter values must be an array');
+          return res.status(400).json(
+            apiResponse(400, false, `Filter values for '${key}' must be a non-empty array`)
+          );
+        }
+        
+        // Validate each filter value
+        for (const value of values) {
+          if (typeof value !== 'string' || value.trim().length === 0) {
+            console.log('Validation failed: Invalid filter value');
+            return res.status(400).json(
+              apiResponse(400, false, `Invalid filter value for '${key}': ${value}`)
+            );
+          }
+        }
       }
     }
 
-    if (hasDiscount === 'true') {
-      query.$or = [
+    console.log('Filter validation passed');
+
+    // Build query options
+    const queryOptions = {
+      categoryId: categoryId || undefined,
+      subcategoryId: subcategoryId || undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      search: search || undefined,
+      sortBy: sortBy,
+      sortOrder: parseInt(sortOrder),
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
+
+    console.log('Query options:', queryOptions);
+
+    // Use the new getByFilters method
+    const items = await Item.getByFilters(filters, queryOptions);
+    console.log('Retrieved items count:', items.length);
+
+    // Get total count for pagination
+    const totalQuery = {};
+    
+    // Apply filter criteria to count query
+    if (Object.keys(filters).length > 0) {
+      const filterQueries = [];
+      Object.entries(filters).forEach(([key, values]) => {
+        if (values && values.length > 0) {
+          const valueArray = Array.isArray(values) ? values : [values];
+          const filterQuery = {
+            'filters.key': key,
+            'filters.values': { $in: valueArray }
+          };
+          filterQueries.push(filterQuery);
+        }
+      });
+      if (filterQueries.length > 0) {
+        totalQuery.$and = filterQueries;
+      }
+    }
+
+    // Apply other filters to count query
+    if (categoryId) totalQuery.categoryId = categoryId;
+    if (subcategoryId) totalQuery.subcategoryId = subcategoryId;
+    if (minPrice || maxPrice) {
+      totalQuery.price = {};
+      if (minPrice) totalQuery.price.$gte = parseFloat(minPrice);
+      if (maxPrice) totalQuery.price.$lte = parseFloat(maxPrice);
+    }
+    if (search) {
+      totalQuery.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (hasDiscount === true) {
+      totalQuery.$or = [
         { discountPrice: { $gt: 0 } },
         { discountPercentage: { $gt: 0 } }
       ];
-      console.log('Added discount filter');
     }
 
-    console.log('Final query:', query);
-
-    // Build sort object
-    const sort = {};
-    sort[sortBy] = parseInt(sortOrder);
-    console.log('Sort object:', sort);
-
-    // Pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    console.log('Pagination - skip:', skip, 'limit:', limit);
-
-    const items = await Item.find(query)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit));
-    console.log('Retrieved items count:', items.length);
-
-    const total = await Item.countDocuments(query);
+    const total = await Item.countDocuments(totalQuery);
     console.log('Total items count:', total);
 
     res.status(200).json(
@@ -331,7 +474,8 @@ const getAllItems = async (req, res) => {
           totalPages: Math.ceil(total / parseInt(limit)),
           totalItems: total,
           itemsPerPage: parseInt(limit)
-        }
+        },
+        filters: filters
       })
     );
 
@@ -378,6 +522,7 @@ const updateItem = async (req, res) => {
   console.log('Item ID:', req.params.id);
   console.log('Update data:', req.body);
   console.log('Thumbnail image:', req.file ? 'Present' : 'Not present');
+  console.log('Files:', req.files);
   
   try {
     const { id } = req.params;
@@ -388,10 +533,12 @@ const updateItem = async (req, res) => {
       discountPrice, 
       discountPercentage,
       keyHighlights,
-      variants 
+      variants,
+      categoryId,
+      subcategoryId
     } = req.body;
     const thumbnailImage = req.file;
-    console.log('Extracted update data - name:', name, 'price:', price, 'discountPrice:', discountPrice, 'discountPercentage:', discountPercentage);
+    console.log('Extracted update data - name:', name, 'price:', price, 'discountPrice:', discountPrice, 'discountPercentage:', discountPercentage, 'categoryId:', categoryId, 'subcategoryId:', subcategoryId);
 
     const item = await Item.findById(id);
     if (!item) {
@@ -425,7 +572,22 @@ const updateItem = async (req, res) => {
       );
     }
 
-    console.log('Price validation passed');
+    // Validate ObjectId format for category and subcategory if provided
+    if (categoryId !== undefined && !mongoose.Types.ObjectId.isValid(categoryId)) {
+      console.log('Validation failed: Invalid category ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid category ID format')
+      );
+    }
+
+    if (subcategoryId !== undefined && !mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      console.log('Validation failed: Invalid subcategory ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid subcategory ID format')
+      );
+    }
+
+    console.log('Price and ID validation passed');
 
     // Update fields
     if (name !== undefined) {
@@ -448,13 +610,148 @@ const updateItem = async (req, res) => {
       item.discountPercentage = discountPercentage;
       console.log('Discount percentage updated');
     }
+    if (categoryId !== undefined) {
+      item.categoryId = categoryId;
+      console.log('Category ID updated');
+    }
+    if (subcategoryId !== undefined) {
+      item.subcategoryId = subcategoryId;
+      console.log('Subcategory ID updated');
+    }
+
+    // Handle key highlights update if provided
     if (keyHighlights !== undefined) {
-      item.keyHighlights = keyHighlights;
+      try {
+        let highlightsData = keyHighlights;
+        if (typeof keyHighlights === 'string') {
+          highlightsData = JSON.parse(keyHighlights);
+        }
+        
+        if (Array.isArray(highlightsData)) {
+          // Validate key highlights
+          for (const highlight of highlightsData) {
+            if (!highlight.key || !highlight.value) {
+              throw new Error('Each key highlight must have key and value');
+            }
+            if (highlight.key.length > 100 || highlight.value.length > 200) {
+              throw new Error('Key highlight key or value exceeds maximum length');
+            }
+          }
+          item.keyHighlights = highlightsData;
       console.log('Key highlights updated');
     }
+      } catch (parseError) {
+        console.log('Failed to parse keyHighlights:', parseError);
+        return res.status(400).json(
+          apiResponse(400, false, 'Invalid keyHighlights format')
+        );
+      }
+    }
+
+    // Handle variants update if provided
     if (variants !== undefined) {
-      item.variants = variants;
+      try {
+        let variantsData = variants;
+        if (typeof variants === 'string') {
+          variantsData = JSON.parse(variants);
+        }
+        
+        if (Array.isArray(variantsData)) {
+          // Validate variants structure
+          for (const variant of variantsData) {
+            if (!variant.size || !variant.colors || !Array.isArray(variant.colors)) {
+              throw new Error('Each variant must have size and colors array');
+            }
+            
+            for (const color of variant.colors) {
+              if (!color.name || !color.sku) {
+                throw new Error('Each color must have name and SKU');
+              }
+              
+              // Validate hex code if provided
+              if (color.hexCode && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color.hexCode)) {
+                throw new Error('Invalid color hex code format');
+              }
+              
+              // Check if SKU already exists in other items
+              if (color.sku !== color.originalSku) { // Only check if SKU changed
+                const existingItem = await Item.findOne({
+                  _id: { $ne: id }, // Exclude current item
+                  'variants.colors.sku': color.sku.toUpperCase()
+                });
+                if (existingItem) {
+                  throw new Error(`SKU ${color.sku} already exists in another item`);
+                }
+              }
+            }
+          }
+          
+          // Update variants
+          item.variants = variantsData;
       console.log('Variants updated');
+        }
+      } catch (parseError) {
+        console.log('Failed to parse variants:', parseError);
+        return res.status(400).json(
+          apiResponse(400, false, `Invalid variants format: ${parseError.message}`)
+        );
+      }
+    }
+
+    // Handle filters update if provided
+    if (req.body.filters !== undefined) {
+      try {
+        let filtersData = req.body.filters;
+        if (typeof req.body.filters === 'string') {
+          filtersData = JSON.parse(req.body.filters);
+        }
+        
+        if (Array.isArray(filtersData)) {
+          // Validate filters structure
+          for (const filter of filtersData) {
+            if (!filter.key || !filter.values || !Array.isArray(filter.values) || filter.values.length === 0) {
+              throw new Error('Each filter must have key and values array');
+            }
+            if (filter.key.length > 100) {
+              throw new Error('Filter key exceeds maximum length');
+            }
+            
+            // Validate filter values
+            const validValues = filter.values.filter(value => 
+              value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100
+            );
+            
+            if (validValues.length === 0) {
+              throw new Error('Each filter must have at least one valid value');
+            }
+
+            // Process display values if provided
+            let displayValues = validValues;
+            if (filter.displayValues && Array.isArray(filter.displayValues)) {
+              displayValues = filter.displayValues.filter((value, index) => 
+                value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100 && index < validValues.length
+              );
+              // Ensure displayValues has same length as values
+              while (displayValues.length < validValues.length) {
+                displayValues.push(validValues[displayValues.length]);
+              }
+            }
+
+            // Update filter values
+            filter.values = validValues.map(v => v.trim());
+            filter.displayValues = displayValues.map(v => v.trim());
+          }
+          
+          // Update filters
+          item.filters = filtersData;
+          console.log('Filters updated');
+        }
+      } catch (parseError) {
+        console.log('Failed to parse filters:', parseError);
+        return res.status(400).json(
+          apiResponse(400, false, `Invalid filters format: ${parseError.message}`)
+        );
+      }
     }
 
     // Handle thumbnail image update if provided
@@ -487,6 +784,64 @@ const updateItem = async (req, res) => {
       }
     }
 
+    // Handle variant images update if provided
+    const variantImages = req.files?.variantImages;
+    if (variantImages && variantImages.length > 0) {
+      console.log('Processing variant images update...');
+      try {
+        // Group images by variant and color
+        const variantImageMap = {};
+        
+        for (const file of variantImages) {
+          // Extract variant info from filename or use metadata
+          const filename = file.originalname;
+          // Expected format: variant-size_color-name_image.jpg
+          const parts = filename.split('_');
+          if (parts.length >= 2) {
+            const size = parts[0];
+            const colorName = parts[1];
+            const key = `${size}_${colorName}`;
+            
+            if (!variantImageMap[key]) {
+              variantImageMap[key] = [];
+            }
+            variantImageMap[key].push(file);
+          }
+        }
+
+        // Process each variant's images
+        for (const [key, files] of Object.entries(variantImageMap)) {
+          const [size, colorName] = key.split('_');
+          
+          const variant = item.variants.find(v => v.size === size);
+          if (!variant) {
+            console.log(`Variant not found: ${size}, skipping images`);
+            continue;
+          }
+
+          const color = variant.colors.find(c => c.name === colorName);
+          if (!color) {
+            console.log(`Color not found: ${colorName} in variant ${size}, skipping images`);
+            continue;
+          }
+
+          // Upload new images to S3
+          const newImageUrls = await uploadMultipleImagesToS3(files, 'items/variants');
+          console.log(`Uploaded ${newImageUrls.length} images for ${size} - ${colorName}`);
+
+          // Replace existing images (respect 5 image limit)
+          color.images = newImageUrls.slice(0, 5);
+        }
+
+        console.log('Variant images updated successfully');
+      } catch (imageError) {
+        console.error('Variant images upload error:', imageError);
+        return res.status(500).json(
+          apiResponse(500, false, 'Failed to upload variant images')
+        );
+      }
+    }
+
     await item.save();
     console.log('Item updated and saved successfully');
 
@@ -497,7 +852,7 @@ const updateItem = async (req, res) => {
   } catch (error) {
     console.error('Update item error:', error);
     res.status(500).json(
-      apiResponse(500, false, 'Failed to update item')
+      apiResponse(500, false, 'Failed to update item', { error: error.message })
     );
   }
 };
@@ -773,13 +1128,13 @@ const removeKeyHighlight = async (req, res) => {
   }
 };
 
-// Get items by price range
+// Get items by price range (updated to use new filter system)
 const getItemsByPriceRange = async (req, res) => {
   console.log('=== getItemsByPriceRange called ===');
   console.log('Price range:', req.query.minPrice, '-', req.query.maxPrice);
   
   try {
-    const { minPrice, maxPrice } = req.query;
+    const { minPrice, maxPrice, page = 1, limit = 10, sortBy = 'price', sortOrder = 1 } = req.query;
 
     if (!minPrice || !maxPrice) {
       console.log('Validation failed: Missing price range');
@@ -788,12 +1143,46 @@ const getItemsByPriceRange = async (req, res) => {
       );
     }
 
-    console.log('Getting items by price range - min:', minPrice, 'max:', maxPrice);
-    const items = await Item.getByPriceRange(parseFloat(minPrice), parseFloat(maxPrice));
+    // Create filter criteria for price range
+    const filters = {};
+    if (minPrice && maxPrice) {
+      filters.priceRange = [`${minPrice}-${maxPrice}`];
+    }
+
+    // Build query options
+    const queryOptions = {
+      minPrice: parseFloat(minPrice),
+      maxPrice: parseFloat(maxPrice),
+      sortBy: sortBy,
+      sortOrder: parseInt(sortOrder),
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
+
+    console.log('Getting items by price range using new filter system - min:', minPrice, 'max:', maxPrice);
+    const items = await Item.getByFilters(filters, queryOptions);
     console.log('Retrieved items by price range count:', items.length);
 
+    // Get total count for pagination
+    const totalQuery = {
+      price: {
+        $gte: parseFloat(minPrice),
+        $lte: parseFloat(maxPrice)
+      }
+    };
+    const total = await Item.countDocuments(totalQuery);
+
     res.status(200).json(
-      apiResponse(200, true, 'Items by price range retrieved successfully', items)
+      apiResponse(200, true, 'Items by price range retrieved successfully', {
+        items,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        },
+        filters: filters
+      })
     );
 
   } catch (error) {
@@ -804,16 +1193,50 @@ const getItemsByPriceRange = async (req, res) => {
   }
 };
 
-// Get discounted items
+// Get discounted items (updated to use new filter system)
 const getDiscountedItems = async (req, res) => {
   console.log('=== getDiscountedItems called ===');
   
   try {
-    const items = await Item.getDiscountedItems();
+    const { page = 1, limit = 10, sortBy = 'discountPercentage', sortOrder = -1 } = req.query;
+
+    // Create filter criteria for discounted items
+    const filters = {
+      hasDiscount: ['true']
+    };
+
+    // Build query options
+    const queryOptions = {
+      sortBy: sortBy,
+      sortOrder: parseInt(sortOrder),
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
+
+    console.log('Getting discounted items using new filter system');
+    const items = await Item.getByFilters(filters, queryOptions);
     console.log('Retrieved discounted items count:', items.length);
 
+    // Get total count for pagination
+    const totalQuery = {
+      $or: [
+        { discountPrice: { $gt: 0 } },
+        { discountPercentage: { $gt: 0 } }
+      ]
+    };
+    const total = await Item.countDocuments(totalQuery);
+
     res.status(200).json(
-      apiResponse(200, true, 'Discounted items retrieved successfully', items)
+      apiResponse(200, true, 'Discounted items retrieved successfully', {
+        items,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        },
+        filters: filters
+      })
     );
 
   } catch (error) {
@@ -824,7 +1247,7 @@ const getDiscountedItems = async (req, res) => {
   }
 };
 
-// Search items
+// Search items (updated to use new filter system)
 const searchItems = async (req, res) => {
   console.log('=== searchItems called ===');
   console.log('Search query:', req.query.q);
@@ -841,41 +1264,56 @@ const searchItems = async (req, res) => {
       );
     }
 
-    const searchRegex = new RegExp(q, 'i');
-    console.log('Search regex created:', searchRegex);
+    // Create filter criteria for search
+    const filters = {};
     
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    console.log('Pagination - skip:', skip, 'limit:', limit);
+    // Add search filter
+    if (q) {
+      filters.search = [q];
+    }
 
-    // Build query
-    const query = {
-      $or: [
-        { name: searchRegex },
-        { description: searchRegex }
-      ]
-    };
-
+    // Add price range filter if provided
     if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) {
-        query.price.$gte = parseFloat(minPrice);
-        console.log('Added min price filter:', minPrice);
-      }
-      if (maxPrice) {
-        query.price.$lte = parseFloat(maxPrice);
-        console.log('Added max price filter:', maxPrice);
+      if (minPrice && maxPrice) {
+        filters.priceRange = [`${minPrice}-${maxPrice}`];
+      } else if (minPrice) {
+        filters.minPrice = [minPrice];
+      } else if (maxPrice) {
+        filters.maxPrice = [maxPrice];
       }
     }
 
-    console.log('Final search query:', query);
+    // Build query options
+    const queryOptions = {
+      search: q,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sortBy: 'createdAt',
+      sortOrder: -1,
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
 
-    const items = await Item.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+    console.log('Searching items using new filter system - query:', q);
+    const items = await Item.getByFilters(filters, queryOptions);
     console.log('Search results count:', items.length);
 
-    const total = await Item.countDocuments(query);
+    // Get total count for pagination
+    const searchQuery = {
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } }
+      ]
+    };
+
+    // Add price range to search query if provided
+    if (minPrice || maxPrice) {
+      searchQuery.price = {};
+      if (minPrice) searchQuery.price.$gte = parseFloat(minPrice);
+      if (maxPrice) searchQuery.price.$lte = parseFloat(maxPrice);
+    }
+
+    const total = await Item.countDocuments(searchQuery);
     console.log('Total search results:', total);
 
     res.status(200).json(
@@ -886,7 +1324,8 @@ const searchItems = async (req, res) => {
           totalPages: Math.ceil(total / parseInt(limit)),
           totalItems: total,
           itemsPerPage: parseInt(limit)
-        }
+        },
+        filters: filters
       })
     );
 
@@ -977,6 +1416,109 @@ const uploadVariantImages = async (req, res) => {
   }
 };
 
+// Update variant images
+const updateVariantImages = async (req, res) => {
+  console.log('=== updateVariantImages called ===');
+  console.log('Item ID:', req.params.id);
+  console.log('Files:', req.files);
+  console.log('Body:', req.body);
+  
+  try {
+    const { id } = req.params;
+    const { variantData } = req.body; // JSON string containing variant update data
+    const images = req.files?.images || [];
+
+    if (!variantData) {
+      console.log('Validation failed: Missing variant data');
+      return res.status(400).json(
+        apiResponse(400, false, 'Variant data is required')
+      );
+    }
+
+    let parsedVariantData;
+    try {
+      parsedVariantData = JSON.parse(variantData);
+    } catch (parseError) {
+      console.log('Failed to parse variant data:', parseError);
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid variant data format')
+      );
+    }
+
+    const item = await Item.findById(id);
+    if (!item) {
+      console.log('Item not found for updating variant images:', id);
+      return res.status(404).json(
+        apiResponse(404, false, 'Item not found')
+      );
+    }
+
+    // Process each variant update
+    for (const variantUpdate of parsedVariantData) {
+      const { size, colorName, newImages, removeImages } = variantUpdate;
+      
+      const variant = item.variants.find(v => v.size === size);
+      if (!variant) {
+        console.log(`Variant not found: ${size}`);
+        continue;
+      }
+
+      const color = variant.colors.find(c => c.name === colorName);
+      if (!color) {
+        console.log(`Color not found: ${colorName} in variant ${size}`);
+        continue;
+      }
+
+      // Remove specified images
+      if (removeImages && Array.isArray(removeImages)) {
+        for (const imageUrl of removeImages) {
+          try {
+            await deleteFromS3(imageUrl);
+            console.log(`Deleted image: ${imageUrl}`);
+          } catch (deleteError) {
+            console.error(`Failed to delete image: ${imageUrl}`, deleteError);
+          }
+        }
+        
+        // Remove from color.images array
+        color.images = color.images.filter(img => !removeImages.includes(img));
+      }
+
+      // Add new images if provided
+      if (newImages && Array.isArray(newImages) && newImages.length > 0) {
+        // Find matching uploaded files
+        const matchingImages = images.filter(file => 
+          newImages.includes(file.originalname)
+        );
+
+        if (matchingImages.length > 0) {
+          // Upload new images to S3
+          const newImageUrls = await uploadMultipleImagesToS3(matchingImages, 'items/variants');
+          console.log(`Uploaded ${newImageUrls.length} new images for ${colorName}`);
+          
+          // Add to existing images (respect 5 image limit)
+          const availableSlots = 5 - color.images.length;
+          const imagesToAdd = newImageUrls.slice(0, availableSlots);
+          color.images.push(...imagesToAdd);
+        }
+      }
+    }
+
+    await item.save();
+    console.log('Item saved with updated variant images');
+
+    res.status(200).json(
+      apiResponse(200, true, 'Variant images updated successfully', item)
+    );
+
+  } catch (error) {
+    console.error('Update variant images error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to update variant images')
+    );
+  }
+};
+
 // Bulk upload items
 const bulkUploadItems = async (req, res) => {
   console.log('=== bulkUploadItems called ===');
@@ -986,11 +1528,34 @@ const bulkUploadItems = async (req, res) => {
   try {
     const jsonFile = req.files?.jsonFile?.[0];
     const images = req.files?.images || [];
+    const { categoryId, subcategoryId } = req.body;
     
     if (!jsonFile) {
       console.log('Validation failed: JSON file is required');
       return res.status(400).json(
         apiResponse(400, false, 'JSON file is required for bulk upload')
+      );
+    }
+
+    if (!categoryId || !subcategoryId) {
+      console.log('Validation failed: Category ID and Subcategory ID are required');
+      return res.status(400).json(
+        apiResponse(400, false, 'Category ID and Subcategory ID are required for bulk upload')
+      );
+    }
+
+    // Validate ObjectId format for category and subcategory
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      console.log('Validation failed: Invalid category ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid category ID format')
+      );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      console.log('Validation failed: Invalid subcategory ID format');
+      return res.status(400).json(
+        apiResponse(400, false, 'Invalid subcategory ID format')
       );
     }
 
@@ -1036,6 +1601,7 @@ const bulkUploadItems = async (req, res) => {
     }
 
     console.log('Processing bulk upload for', itemsData.length, 'items');
+    console.log('Category ID:', categoryId, 'Subcategory ID:', subcategoryId);
 
     // Images will be processed individually for each item
     console.log('Images will be processed individually for each item');
@@ -1128,7 +1694,7 @@ const bulkUploadItems = async (req, res) => {
                 'variants.colors.sku': color.sku.toUpperCase()
               });
               if (existingItem) {
-                throw new Error(`SKU ${color.sku} already exists`);
+                throw new Error(`SKU ${color.sku} already exists in another item`);
               }
 
               // Process images for this color
@@ -1190,7 +1756,47 @@ const bulkUploadItems = async (req, res) => {
           }
         }
 
-        // Create new item
+        // Process filters if provided
+        let processedFilters = [];
+        if (itemData.filters && Array.isArray(itemData.filters)) {
+          for (const filter of itemData.filters) {
+            if (!filter.key || !filter.values || !Array.isArray(filter.values) || filter.values.length === 0) {
+              throw new Error('Each filter must have key and values array');
+            }
+            if (filter.key.length > 100) {
+              throw new Error('Filter key exceeds maximum length');
+            }
+            
+            // Validate filter values
+            const validValues = filter.values.filter(value => 
+              value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100
+            );
+            
+            if (validValues.length === 0) {
+              throw new Error('Each filter must have at least one valid value');
+            }
+
+            // Process display values if provided
+            let displayValues = validValues;
+            if (filter.displayValues && Array.isArray(filter.displayValues)) {
+              displayValues = filter.displayValues.filter((value, index) => 
+                value && typeof value === 'string' && value.trim().length > 0 && value.length <= 100 && index < validValues.length
+              );
+              // Ensure displayValues has same length as values
+              while (displayValues.length < validValues.length) {
+                displayValues.push(validValues[displayValues.length]);
+              }
+            }
+
+            processedFilters.push({
+              key: filter.key.trim(),
+              values: validValues.map(v => v.trim()),
+              displayValues: displayValues.map(v => v.trim())
+            });
+          }
+        }
+
+        // Create new item with category and subcategory IDs
         const item = new Item({
           name: itemData.name.trim(),
           description: itemData.description ? itemData.description.trim() : '',
@@ -1198,8 +1804,11 @@ const bulkUploadItems = async (req, res) => {
           discountPrice: discountPrice,
           discountPercentage: discountPercentage,
           thumbnailImage: thumbnailImageUrl,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
           keyHighlights: processedKeyHighlights,
-          variants: processedVariants
+          variants: processedVariants,
+          filters: processedFilters
         });
 
         await item.save();
@@ -1245,6 +1854,210 @@ const bulkUploadItems = async (req, res) => {
   }
 };
 
+// Get available filter options
+const getAvailableFilters = async (req, res) => {
+  console.log('=== getAvailableFilters called ===');
+  console.log('Query parameters:', req.query);
+  
+  try {
+    const { categoryId, subcategoryId } = req.query;
+    console.log('Getting available filters for categoryId:', categoryId, 'subcategoryId:', subcategoryId);
+
+    const filters = await Item.getAvailableFilters(categoryId, subcategoryId);
+    console.log('Retrieved available filters count:', filters.length);
+
+    res.status(200).json(
+      apiResponse(200, true, 'Available filters retrieved successfully', filters)
+    );
+
+  } catch (error) {
+    console.error('Get available filters error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to retrieve available filters')
+    );
+  }
+};
+
+// Add filter to item
+const addItemFilter = async (req, res) => {
+  console.log('=== addItemFilter called ===');
+  console.log('Item ID:', req.params.id);
+  console.log('Filter data:', req.body);
+  
+  try {
+    const { id } = req.params;
+    const { key, values, displayValues } = req.body;
+
+    if (!key || !values || !Array.isArray(values) || values.length === 0) {
+      console.log('Validation failed: Missing required filter fields');
+      return res.status(400).json(
+        apiResponse(400, false, 'Filter key and values array are required')
+      );
+    }
+
+    const item = await Item.findById(id);
+    if (!item) {
+      console.log('Item not found for adding filter:', id);
+      return res.status(404).json(
+        apiResponse(404, false, 'Item not found')
+      );
+    }
+
+    console.log('Item found, adding filter - key:', key, 'values:', values);
+    await item.addFilter(key, values, displayValues);
+    console.log('Filter added successfully');
+
+    res.status(200).json(
+      apiResponse(200, true, 'Filter added successfully', item)
+    );
+
+  } catch (error) {
+    console.error('Add item filter error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to add filter')
+    );
+  }
+};
+
+// Update item filter
+const updateItemFilter = async (req, res) => {
+  console.log('=== updateItemFilter called ===');
+  console.log('Item ID:', req.params.id);
+  console.log('Filter update data:', req.body);
+  
+  try {
+    const { id } = req.params;
+    const { key, values, displayValues } = req.body;
+
+    if (!key || !values || !Array.isArray(values) || values.length === 0) {
+      console.log('Validation failed: Missing required filter fields');
+      return res.status(400).json(
+        apiResponse(400, false, 'Filter key and values array are required')
+      );
+    }
+
+    const item = await Item.findById(id);
+    if (!item) {
+      console.log('Item not found for updating filter:', id);
+      return res.status(404).json(
+        apiResponse(404, false, 'Item not found')
+      );
+    }
+
+    console.log('Item found, updating filter - key:', key, 'values:', values);
+    await item.updateFilter(key, values, displayValues);
+    console.log('Filter updated successfully');
+
+    res.status(200).json(
+      apiResponse(200, true, 'Filter updated successfully', item)
+    );
+
+  } catch (error) {
+    console.error('Update item filter error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to update filter')
+    );
+  }
+};
+
+// Remove item filter
+const removeItemFilter = async (req, res) => {
+  console.log('=== removeItemFilter called ===');
+  console.log('Item ID:', req.params.id);
+  console.log('Filter key to remove:', req.params.filterKey);
+  
+  try {
+    const { id, filterKey } = req.params;
+
+    const item = await Item.findById(id);
+    if (!item) {
+      console.log('Item not found for removing filter:', id);
+      return res.status(404).json(
+        apiResponse(404, false, 'Item not found')
+      );
+    }
+
+    console.log('Item found, removing filter - key:', filterKey);
+    await item.removeFilter(filterKey);
+    console.log('Filter removed successfully');
+
+    res.status(200).json(
+      apiResponse(200, true, 'Filter removed successfully', item)
+    );
+
+  } catch (error) {
+    console.error('Remove item filter error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to remove filter')
+    );
+  }
+};
+
+// Get items by specific filter (updated to use new filter system)
+const getItemsByFilter = async (req, res) => {
+  console.log('=== getItemsByFilter called ===');
+  console.log('Filter key:', req.params.filterKey);
+  console.log('Filter value:', req.params.filterValue);
+  console.log('Query parameters:', req.query);
+  
+  try {
+    const { filterKey, filterValue } = req.params;
+    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = -1 } = req.query;
+
+    if (!filterKey || !filterValue) {
+      console.log('Validation failed: Missing filter key or value');
+      return res.status(400).json(
+        apiResponse(400, false, 'Filter key and value are required')
+      );
+    }
+
+    console.log('Getting items by filter using new filter system - key:', filterKey, 'value:', filterValue);
+
+    // Create filter criteria using the new system
+    const filters = {
+      [filterKey]: [filterValue]
+    };
+
+    // Build query options
+    const queryOptions = {
+      sortBy: sortBy,
+      sortOrder: parseInt(sortOrder),
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
+
+    const items = await Item.getByFilters(filters, queryOptions);
+    console.log('Retrieved items by filter count:', items.length);
+
+    // Get total count using the new filter system
+    const totalQuery = {
+      'filters.key': filterKey,
+      'filters.values': filterValue
+    };
+    const total = await Item.countDocuments(totalQuery);
+
+    res.status(200).json(
+      apiResponse(200, true, 'Items by filter retrieved successfully', {
+        items,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / parseInt(limit)),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        },
+        filter: { key: filterKey, value: filterValue },
+        filters: filters
+      })
+    );
+
+  } catch (error) {
+    console.error('Get items by filter error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to retrieve items by filter')
+    );
+  }
+};
+
 module.exports = {
   createItem,
   getAllItems,
@@ -1260,5 +2073,11 @@ module.exports = {
   getDiscountedItems,
   searchItems,
   uploadVariantImages,
-  bulkUploadItems
+  updateVariantImages,
+  bulkUploadItems,
+  getAvailableFilters,
+  addItemFilter,
+  updateItemFilter,
+  removeItemFilter,
+  getItemsByFilter
 };

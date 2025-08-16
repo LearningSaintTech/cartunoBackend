@@ -33,6 +33,7 @@ const upload = multer({
 // Public routes (no authentication required)
 router.get('/active-by-category/:categoryId', getActiveByCategory);
 router.get('/with-category', getAllWithCategory);
+router.get('/all', getAllSubCategories);
 router.get('/search', searchSubCategories);
 
 // Protected routes (admin authentication required)

@@ -1,0 +1,228 @@
+{
+  "itemFilteringExamples": {
+    "basicFiltering": {
+      "description": "Basic filtering with pagination and sorting",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 10,
+        "sortBy": "createdAt",
+        "sortOrder": -1,
+        "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0",
+        "subcategoryId": "64f8a1b2c3d4e5f6a7b8c9d1"
+      }
+    },
+    
+    "priceFiltering": {
+      "description": "Filter by price range and discount",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 20,
+        "minPrice": 100,
+        "maxPrice": 1000,
+        "hasDiscount": true,
+        "sortBy": "price",
+        "sortOrder": 1
+      }
+    },
+    
+    "searchWithFilters": {
+      "description": "Search items with text and apply filters",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 15,
+        "search": "cotton shirt",
+        "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0",
+        "filters": {
+          "brand": ["Nike", "Adidas"],
+          "size": ["M", "L", "XL"],
+          "color": ["blue", "black"]
+        }
+      }
+    },
+    
+    "complexFiltering": {
+      "description": "Complex filtering with multiple criteria",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 25,
+        "sortBy": "price",
+        "sortOrder": -1,
+        "minPrice": 50,
+        "maxPrice": 500,
+        "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0",
+        "subcategoryId": "64f8a1b2c3d4e5f6a7b8c9d1",
+        "hasDiscount": true,
+        "filters": {
+          "brand": ["Nike", "Adidas", "Puma"],
+          "material": ["cotton", "polyester"],
+          "size": ["S", "M", "L", "XL"],
+          "color": ["blue", "black", "white", "red"],
+          "style": ["casual", "sports"],
+          "season": ["summer", "winter"],
+          "fit": ["regular", "slim", "loose"],
+          "pattern": ["solid", "striped", "printed"],
+          "sleeve": ["short", "long", "sleeveless"],
+          "neckline": ["round", "v-neck", "polo"]
+        }
+      }
+    },
+    
+    "categorySpecificFiltering": {
+      "description": "Filter items within a specific category",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 30,
+        "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0",
+        "sortBy": "name",
+        "sortOrder": 1,
+        "filters": {
+          "gender": ["men", "women"],
+          "age_group": ["adult", "teen"],
+          "occasion": ["casual", "formal", "party"]
+        }
+      }
+    },
+    
+    "stockBasedFiltering": {
+      "description": "Filter items based on availability",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 20,
+        "filters": {
+          "availability": ["in_stock", "low_stock"],
+          "brand": ["Nike", "Adidas"]
+        }
+      }
+    },
+    
+    "trendingFiltering": {
+      "description": "Get trending items with filters",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 15,
+        "sortBy": "updatedAt",
+        "sortOrder": -1,
+        "filters": {
+          "trending": ["true"],
+          "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0"
+        }
+      }
+    },
+    
+    "noFilters": {
+      "description": "Get all items without any filters (initial load)",
+      "endpoint": "POST /items/filter",
+      "requestBody": {
+        "page": 1,
+        "limit": 20,
+        "sortBy": "createdAt",
+        "sortOrder": -1
+      }
+    }
+  },
+  
+  "filterKeys": {
+    "commonFilters": [
+      "brand",
+      "color", 
+      "size",
+      "material",
+      "style",
+      "season",
+      "fit",
+      "pattern",
+      "sleeve",
+      "neckline",
+      "gender",
+      "age_group",
+      "occasion",
+      "availability",
+      "trending",
+      "featured",
+      "new_arrival",
+      "best_seller"
+    ],
+    
+    "filterValues": {
+      "brand": ["Nike", "Adidas", "Puma", "Reebok", "Under Armour"],
+      "color": ["red", "blue", "black", "white", "green", "yellow", "purple", "pink", "orange", "brown", "gray"],
+      "size": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+      "material": ["cotton", "polyester", "wool", "silk", "denim", "leather", "suede"],
+      "style": ["casual", "formal", "sports", "vintage", "modern", "classic", "trendy"],
+      "season": ["spring", "summer", "autumn", "winter", "all_season"],
+      "fit": ["regular", "slim", "loose", "oversized", "tailored"],
+      "pattern": ["solid", "striped", "printed", "floral", "geometric", "abstract"],
+      "sleeve": ["short", "long", "sleeveless", "three_quarter", "cap"],
+      "neckline": ["round", "v-neck", "polo", "crew", "turtle", "square"],
+      "gender": ["men", "women", "unisex", "boys", "girls"],
+      "age_group": ["kids", "teen", "adult", "senior"],
+      "occasion": ["casual", "formal", "party", "sports", "business", "wedding"],
+      "availability": ["in_stock", "low_stock", "out_of_stock", "pre_order"],
+      "trending": ["true", "false"],
+      "featured": ["true", "false"],
+      "new_arrival": ["true", "false"],
+      "best_seller": ["true", "false"]
+    }
+  },
+  
+  "responseExample": {
+    "statusCode": 200,
+    "success": true,
+    "message": "Items retrieved successfully",
+    "data": {
+      "items": [
+        {
+          "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
+          "name": "Nike Cotton T-Shirt",
+          "description": "Comfortable cotton t-shirt for everyday wear",
+          "price": 29.99,
+          "discountPrice": 24.99,
+          "discountPercentage": 17,
+          "thumbnailImage": "https://example.com/images/nike-tshirt.jpg",
+          "categoryId": "64f8a1b2c3d4e5f6a7b8c9d0",
+          "subcategoryId": "64f8a1b2c3d4e5f6a7b8c9d1",
+          "filters": {
+            "brand": ["Nike"],
+            "material": ["cotton"],
+            "size": ["S", "M", "L", "XL"],
+            "color": ["blue", "black", "white"],
+            "style": ["casual"],
+            "gender": ["men"]
+          },
+          "variants": [
+            {
+              "size": "M",
+              "colors": [
+                {
+                  "name": "Blue",
+                  "sku": "NKE-TS-M-BLU",
+                  "stock": 25,
+                  "images": ["https://example.com/images/nike-tshirt-blue-1.jpg"]
+                }
+              ]
+            }
+          ],
+          "createdAt": "2024-01-15T10:30:00.000Z",
+          "updatedAt": "2024-01-15T10:30:00.000Z"
+        }
+      ],
+      "pagination": {
+        "currentPage": 1,
+        "totalPages": 5,
+        "totalItems": 125,
+        "itemsPerPage": 25
+      },
+      "filters": {
+        "brand": ["Nike"],
+        "color": ["blue"]
+      }
+    }
+  }
+}

@@ -16,7 +16,13 @@ const {
   getDiscountedItems,
   searchItems,
   uploadVariantImages,
-  bulkUploadItems
+  bulkUploadItems,
+  updateVariantImages,
+  getAvailableFilters,
+  addItemFilter,
+  updateItemFilter,
+  removeItemFilter,
+  getItemsByFilter
 } = require('../controllers/itemController');
 const { verifyAuth } = require('../middleware/auth');
 
@@ -81,6 +87,8 @@ const uploadBulk = multer({
 router.get('/search', searchItems);
 router.get('/price-range', getItemsByPriceRange);
 router.get('/discounted', getDiscountedItems);
+router.get('/filters/available', getAvailableFilters); // Get available filter options
+router.get('/filter/:filterKey/:filterValue', getItemsByFilter); // Get items by specific filter
 router.get('/:id', getItemById);
 
 // Protected routes (admin authentication required)
@@ -88,19 +96,42 @@ router.post('/', verifyAuth(['admin']), uploadMultiple.fields([
   { name: 'thumbnailImage', maxCount: 1 },
   { name: 'variantImages', maxCount: 25 }
 ]), createItem);
-router.get('/', getAllItems);
-router.put('/:id', verifyAuth(['admin']), upload.single('thumbnailImage'), updateItem);
+
+// Filter items with complex criteria (POST method for JSON body)
+router.post('/filter', getAllItems);
+
+// Simple get all items (GET method for basic queries)
+router.get('/', (req, res) => {
+  // Redirect to POST /filter for complex filtering
+  res.status(405).json({
+    success: false,
+    message: 'Use POST /filter for advanced filtering. For simple queries, use specific endpoints like /search, /price-range, etc.'
+  });
+});
+
+router.put('/:id', verifyAuth(['admin']), uploadMultiple.fields([
+  { name: 'thumbnailImage', maxCount: 1 },
+  { name: 'variantImages', maxCount: 25 }
+]), updateItem);
 router.delete('/:id', verifyAuth(['admin']), deleteItem);
 
 // Variant management routes (admin only)
 router.post('/:id/variants', verifyAuth(['admin']), addVariant);
 router.put('/:id/stock', verifyAuth(['admin']), updateStock);
 router.post('/:id/variant-images', verifyAuth(['admin']), uploadMultiple.array('images', 5), uploadVariantImages);
+router.put('/:id/variant-images', verifyAuth(['admin']), uploadMultiple.fields([
+  { name: 'images', maxCount: 25 }
+]), updateVariantImages);
 
 // Key highlights management routes (admin only)
 router.post('/:id/key-highlights', verifyAuth(['admin']), addKeyHighlight);
 router.put('/:id/key-highlights', verifyAuth(['admin']), updateKeyHighlight);
 router.delete('/:id/key-highlights', verifyAuth(['admin']), removeKeyHighlight);
+
+// Filter management routes (admin only)
+router.post('/:id/filters', verifyAuth(['admin']), addItemFilter); // Add filter to item
+router.put('/:id/filters', verifyAuth(['admin']), updateItemFilter); // Update item filter
+router.delete('/:id/filters/:filterKey', verifyAuth(['admin']), removeItemFilter); // Remove item filter
 
 // Bulk upload route (admin only)
 router.post('/bulk-upload', verifyAuth(['admin']), uploadBulk.fields([
