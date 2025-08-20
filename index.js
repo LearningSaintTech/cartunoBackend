@@ -26,6 +26,8 @@ const itemRoutes = require('./routes/itemRoutes');
 const reviewRatingRoutes = require('./routes/reviewRatingRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 const globalFilterRoutes = require('./routes/globalFilterRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const wishlistRoutes = require('./routes/whishlistRoutes');
 
 // Basic route
 app.get('/', (req, res) => {
@@ -50,6 +52,8 @@ app.use('/api/items', itemRoutes);
 app.use('/api/reviews', reviewRatingRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/global-filters', globalFilterRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 
 // Error handling middleware
