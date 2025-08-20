@@ -58,19 +58,22 @@ const addToWishlist = async (req, res) => {
 
     console.log('Input validation passed');
 
-    // Check if item exists and is active
+    // Check if item exists
     const item = await Item.findById(itemId);
     if (!item) {
       console.log('Item not found:', itemId);
       return res.status(404).json(apiResponse(404, false, 'Item not found'));
     }
 
-    if (!item.isActive) {
-      console.log('Item is not active:', itemId);
-      return res.status(400).json(apiResponse(400, false, 'Item is not available'));
-    }
+    // Remove isActive check since items don't have this field
+    // if (!item.isActive) {
+    //   console.log('Item is not active:', itemId);
+    //   return res.status(400).json(apiResponse(400, false, 'Item is not available'));
+    // }
 
-    console.log('Item found and active:', item._id);
+    console.log('Item found:', item._id);
+    console.log('Item name:', item.name);
+    console.log('Item price:', item.price);
 
     // Get or create wishlist
     const wishlist = await Wishlist.getOrCreateWishlist(userId);
@@ -344,6 +347,21 @@ const moveToCart = async (req, res) => {
   }
 };
 
+// Test Item model population (for debugging)
+const testItemPopulation = async (req, res) => {
+  console.log('=== testWishlistItemPopulation called ===');
+  
+  try {
+    const result = await Wishlist.testItemPopulation();
+    console.log('Wishlist population test result:', result);
+    
+    res.json(apiResponse(200, true, 'Wishlist population test completed', result));
+  } catch (error) {
+    console.error('Error testing wishlist population:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to test wishlist population', error.message));
+  }
+};
+
 module.exports = {
   getUserWishlist,
   addToWishlist,
@@ -353,5 +371,6 @@ module.exports = {
   checkItemInWishlist,
   getWishlistStats,
   toggleWishlistStatus,
-  moveToCart
+  moveToCart,
+  testItemPopulation
 };

@@ -30,4 +30,7 @@ router.patch('/toggle-status', verifyAuth(['user']), wishlistController.toggleWi
 // POST /api/wishlist/:itemId/move-to-cart - Move item from wishlist to cart
 router.post('/:itemId/move-to-cart', verifyAuth(['user']), wishlistController.moveToCart);
 
+// GET /api/wishlist/test-population - Test Item model population (for debugging)
+router.get('/test-population', verifyAuth(['user']), wishlistController.testItemPopulation);
+
 module.exports = router;

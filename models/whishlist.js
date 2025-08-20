@@ -95,15 +95,61 @@ wishlistSchema.statics.getOrCreateWishlist = async function(userId) {
   return wishlist;
 };
 
+// Static method to test Item model population
+wishlistSchema.statics.testItemPopulation = async function() {
+  try {
+    console.log('=== Testing Wishlist Item Model Population ===');
+    
+    // Check if Item model exists
+    const ItemModel = mongoose.model('Item');
+    console.log('Item model found:', !!ItemModel);
+    
+    // Try to find a sample item
+    const sampleItem = await ItemModel.findOne();
+    console.log('Sample item found:', !!sampleItem);
+    if (sampleItem) {
+      console.log('Sample item ID:', sampleItem._id);
+      console.log('Sample item name:', sampleItem.name);
+      console.log('Sample item fields:', Object.keys(sampleItem.toObject()));
+    }
+    
+    return { success: true, itemModel: !!ItemModel, sampleItem: !!sampleItem };
+  } catch (error) {
+    console.error('Error testing wishlist Item model population:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Static method to get wishlist with populated items
 wishlistSchema.statics.getWishlistWithItems = async function(userId) {
-  return await this.findOne({ user: userId, isActive: true })
-    .populate({
+  try {
+    const wishlist = await this.findOne({ user: userId, isActive: true });
+    
+    if (!wishlist) {
+      return null;
+    }
+
+    // Populate items with better error handling
+    await wishlist.populate({
       path: 'items.item',
-      select: 'name price discountPrice thumbnailImage isActive',
-      match: { isActive: true }
-    })
-    .populate('user', 'firstname lastname');
+      select: 'name price discountPrice thumbnailImage variants categoryId subcategoryId filters keyHighlights'
+    });
+
+    // Populate user
+    await wishlist.populate('user', 'firstname lastname');
+
+    // Debug: Log populated items
+    console.log('Wishlist items after population:', wishlist.items.map(item => ({
+      itemId: item.item?._id || item.item,
+      itemData: item.item,
+      notes: item.notes
+    })));
+
+    return wishlist;
+  } catch (error) {
+    console.error('Error in getWishlistWithItems:', error);
+    throw error;
+  }
 };
 
 // Static method to check if item is in user's wishlist
@@ -129,8 +175,8 @@ wishlistSchema.statics.getWishlistStats = async function(userId) {
     };
   }
 
-  // Get active items with prices
-  const activeItems = await this.aggregate([
+  // Get items with prices (removed isActive check on items)
+  const itemsWithPrices = await this.aggregate([
     { $match: { user: mongoose.Types.ObjectId(userId), isActive: true } },
     { $unwind: '$items' },
     {
@@ -142,7 +188,8 @@ wishlistSchema.statics.getWishlistStats = async function(userId) {
       }
     },
     { $unwind: '$itemDetails' },
-    { $match: { 'itemDetails.isActive': true } },
+    // Removed isActive check on items since they don't have this field
+    // { $match: { 'itemDetails.isActive': true } },
     {
       $group: {
         _id: null,
@@ -160,7 +207,7 @@ wishlistSchema.statics.getWishlistStats = async function(userId) {
     }
   ]);
 
-  const stats = activeItems[0] || { totalItems: 0, totalValue: 0 };
+  const stats = itemsWithPrices[0] || { totalItems: 0, totalValue: 0 };
   
   return {
     totalItems: wishlist.items.length,

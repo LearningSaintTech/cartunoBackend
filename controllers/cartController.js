@@ -81,12 +81,14 @@ const addToCart = async (req, res) => {
       return res.status(404).json(apiResponse(404, false, 'Item not found'));
     }
 
-    if (!item.isActive) {
-      console.log('Item is not active:', itemId);
-      return res.status(400).json(apiResponse(400, false, 'Item is not available'));
-    }
+    // if (!item.isActive) {
+    //   console.log('Item is not active:', itemId);
+    //   return res.status(400).json(apiResponse(400, false, 'Item is not available'));
+    // }
 
     console.log('Item found and active:', item._id);
+    console.log('Item price:', item.price);
+    console.log('Item discount price:', item.discountPrice);
 
     // Validate variant exists for the item
     const itemVariant = item.variants.find(v => v.size === variant.size);
@@ -259,6 +261,10 @@ const removeFromCart = async (req, res) => {
 const clearCart = async (req, res) => {
   console.log('=== clearCart called ===');
   console.log('User ID:', req.user.userId);
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.originalUrl);
+  console.log('Request params:', req.params);
+  console.log('Request body:', req.body);
   
   try {
     const userId = req.user.userId;
@@ -271,6 +277,7 @@ const clearCart = async (req, res) => {
     }
 
     console.log('Cart found:', cart._id);
+    console.log('Cart items before clearing:', cart.items.length);
 
     // Clear cart
     await cart.clearCart();
@@ -493,6 +500,60 @@ const applyCartDiscount = async (req, res) => {
   }
 };
 
+// Refresh cart prices
+const refreshCartPrices = async (req, res) => {
+  console.log('=== refreshCartPrices called ===');
+  console.log('User ID:', req.user.userId);
+  
+  try {
+    const userId = req.user.userId;
+    
+    const cart = await Cart.findOne({ user: userId, isActive: true });
+    
+    if (!cart) {
+      console.log('Cart not found for user:', userId);
+      return res.status(404).json(apiResponse(404, false, 'Cart not found'));
+    }
+
+    console.log('Cart found:', cart._id);
+    
+    // Refresh prices for all cart items
+    await cart.refreshPrices();
+    console.log('Cart prices refreshed successfully');
+
+    // Get updated cart with populated items
+    const updatedCart = await Cart.getCartWithItems(userId);
+    console.log('Updated cart retrieved');
+
+    res.json(apiResponse(200, true, 'Cart prices refreshed successfully', {
+      cart: updatedCart,
+      itemCount: updatedCart.totalItems,
+      subtotal: updatedCart.subtotal,
+      totalDiscount: updatedCart.totalDiscount,
+      totalAmount: updatedCart.totalAmount
+    }));
+
+  } catch (error) {
+    console.error('Error refreshing cart prices:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to refresh cart prices', error.message));
+  }
+};
+
+// Test Item model population (for debugging)
+const testItemPopulation = async (req, res) => {
+  console.log('=== testItemPopulation called ===');
+  
+  try {
+    const result = await Cart.testItemPopulation();
+    console.log('Population test result:', result);
+    
+    res.json(apiResponse(200, true, 'Population test completed', result));
+  } catch (error) {
+    console.error('Error testing population:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to test population', error.message));
+  }
+};
+
 module.exports = {
   getUserCart,
   addToCart,
@@ -503,5 +564,7 @@ module.exports = {
   checkItemInCart,
   getCartStats,
   toggleCartStatus,
-  applyCartDiscount
+  applyCartDiscount,
+  refreshCartPrices,
+  testItemPopulation
 };
