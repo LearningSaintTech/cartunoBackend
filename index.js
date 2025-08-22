@@ -1,10 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/db');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (explicitly from backend directory)
+const envPath = path.resolve(__dirname, '.env');
+dotenv.config({ path: envPath });
+console.log(`[env] Loaded .env from: ${envPath}`);
+console.log(`[env] FIREBASE_SERVICE_ACCOUNT present: ${!!process.env.FIREBASE_SERVICE_ACCOUNT}`);
+console.log(`[env] FIREBASE_PROJECT_ID present: ${!!process.env.FIREBASE_PROJECT_ID}`);
+console.log(`[env] FIREBASE_CLIENT_EMAIL present: ${!!process.env.FIREBASE_CLIENT_EMAIL}`);
+console.log(`[env] FIREBASE_PRIVATE_KEY present: ${!!process.env.FIREBASE_PRIVATE_KEY}`);
 
 // Initialize express app
 const app = express();
@@ -28,6 +35,7 @@ const addressRoutes = require('./routes/addressRoutes');
 const globalFilterRoutes = require('./routes/globalFilterRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const wishlistRoutes = require('./routes/whishlistRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 // Basic route
 app.get('/', (req, res) => {
@@ -54,6 +62,7 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/global-filters', globalFilterRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/orders', orderRoutes);
 
 
 // Error handling middleware

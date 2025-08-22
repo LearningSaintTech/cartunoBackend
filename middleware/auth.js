@@ -16,7 +16,17 @@ const verifyAuth = (allowedRoles = []) => {
 
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-      req.user = decoded;
+      console.log('🔐 JWT Decoded:', decoded);
+      
+      // Normalize user object for consistency
+      req.user = {
+        id: decoded.userId || decoded.adminId || decoded.id,
+        role: decoded.role,
+        number: decoded.number,
+        ...decoded
+      };
+      
+      console.log('👤 req.user normalized to:', req.user);
 
       // If no specific roles are required, just verify token
       if (!allowedRoles || allowedRoles.length === 0) {

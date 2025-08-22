@@ -1,0 +1,416 @@
+{
+  "info": {
+    "name": "Cartuno Order Management APIs",
+    "description": "Complete collection for testing Cartuno E-commerce Order Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:5000/api/orders",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "order_id_from_create_order_response",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user_id_for_testing",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddressId\": \"{{shippingAddressId}}\",\n  \"billingAddressId\": \"{{billingAddressId}}\",\n  \"paymentMethod\": \"cod\",\n  \"notes\": \"Please deliver in the morning\",\n  \"tax\": 50,\n  \"shippingCharges\": 100,\n  \"discount\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/",
+              "host": ["{{baseURL}}"],
+              "path": [""]
+            },
+            "description": "Create a new order from user's cart. User must have items in cart and valid addresses."
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/my-orders?page=1&limit=10&status=pending",
+              "host": ["{{baseURL}}"],
+              "path": ["my-orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Get user's orders with pagination and filtering options."
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}"]
+            },
+            "description": "Get specific order details by order ID. User can only access their own orders."
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/cancel",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "cancel"]
+            },
+            "description": "Cancel an order. Only pending or confirmed orders can be cancelled."
+          }
+        },
+        {
+          "name": "Return Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong size received\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/return",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "return"]
+            },
+            "description": "Initiate order return. Only delivered orders within 7 days can be returned."
+          }
+        },
+        {
+          "name": "Reorder",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/reorder",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "reorder"]
+            },
+            "description": "Add items from previous order to cart for reordering."
+          }
+        },
+        {
+          "name": "Get User Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/stats/my-stats?startDate=2024-01-01&endDate=2024-01-31",
+              "host": ["{{baseURL}}"],
+              "path": ["stats", "my-stats"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            },
+            "description": "Get user's order statistics and revenue data."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Order Management",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/all?page=1&limit=20&status=pending&search=ORD",
+              "host": ["{{baseURL}}"],
+              "path": ["admin", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "search",
+                  "value": "ORD"
+                }
+              ]
+            },
+            "description": "Get all orders with pagination, filtering, and search. Admin only."
+          }
+        },
+        {
+          "name": "Get Orders by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/status/pending?page=1&limit=20",
+              "host": ["{{baseURL}}"],
+              "path": ["admin", "status", "pending"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get orders by specific status. Admin only."
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\",\n  \"notes\": \"Order has been shipped via Express Delivery\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/status",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "status"]
+            },
+            "description": "Update order status. Admin only. Follows valid status transitions."
+          }
+        },
+        {
+          "name": "Update Payment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentStatus\": \"paid\",\n  \"paymentDetails\": {\n    \"transactionId\": \"TXN123456789\",\n    \"paymentGateway\": \"Razorpay\",\n    \"paymentDate\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/payment-status",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "payment-status"]
+            },
+            "description": "Update payment status and details. Admin only."
+          }
+        },
+        {
+          "name": "Add Tracking Information",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trackingNumber\": \"TRK123456789\",\n  \"courier\": \"Express Delivery\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}/tracking",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}", "tracking"]
+            },
+            "description": "Add tracking number and courier information. Admin only."
+          }
+        },
+        {
+          "name": "Get Admin Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/stats?startDate=2024-01-01&endDate=2024-01-31",
+              "host": ["{{baseURL}}"],
+              "path": ["admin", "stats"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            },
+            "description": "Get order statistics for admin dashboard. Admin only."
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/{{orderId}}",
+              "host": ["{{baseURL}}"],
+              "path": ["{{orderId}}"]
+            },
+            "description": "Soft delete an order. Admin only. Order is marked as inactive."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Payment Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"paymentStatus\": \"paid\",\n  \"paymentDetails\": {\n    \"transactionId\": \"TXN123456789\",\n    \"paymentGateway\": \"Razorpay\",\n    \"paymentDate\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/webhook/payment",
+              "host": ["{{baseURL}}"],
+              "path": ["webhook", "payment"]
+            },
+            "description": "Webhook endpoint for payment gateways to update payment status."
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set environment variables if needed",
+          "if (!pm.environment.get('authToken')) {",
+          "    console.log('Please set authToken in environment variables');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common test script for all requests",
+          "pm.test('Status code is 200 or 201', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+          "});",
+          "",
+          "pm.test('Response has success property', function () {",
+          "    const response = pm.response.json();",
+          "    pm.expect(response).to.have.property('success');",
+          "});",
+          "",
+          "// Store order ID from create order response",
+          "if (pm.request.url.path.includes('/') && pm.request.method === 'POST') {",
+          "    const response = pm.response.json();",
+          "    if (response.success && response.data && response.data.order) {",
+          "        pm.environment.set('orderId', response.data.order._id);",
+          "        console.log('Order ID stored:', response.data.order._id);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

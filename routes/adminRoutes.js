@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { adminLogin } = require('../controllers/adminController');
+const { adminLogin, adminFirebaseLogin } = require('../controllers/adminController');
 
-// Admin login route
+// Admin login routes
 router.post('/login', adminLogin);
+router.post('/firebase-login', adminFirebaseLogin);
 
 module.exports = router;

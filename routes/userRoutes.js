@@ -7,7 +7,8 @@ const {
   getUserProfile, 
   updateProfile, 
   deleteProfileImage,
-  checkProfileStatus 
+  checkProfileStatus,
+  loginWithFirebase,
 } = require('../controllers/userController');
 const { verifyAuth } = require('../middleware/auth');
 
@@ -30,6 +31,7 @@ const upload = multer({
 // Public routes (no authentication required)
 router.post('/request-otp', requestOTP);
 router.post('/verify-otp', verifyOTP);
+router.post('/firebase-login', loginWithFirebase);
 
 // Protected routes (authentication required)
 router.get('/profile', verifyAuth(['user']), getUserProfile);

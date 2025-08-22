@@ -2,6 +2,7 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const { uploadImageToS3, updateFromS3, deleteFromS3 } = require('../utils/s3Upload');
 const { apiResponse } = require('../utils/apiResponse');
+const firebaseAdmin = require('../config/firebase');
 
 // Generate OTP
 const generateOTP = () => {
@@ -17,141 +18,18 @@ const sendOTP = async (number, otp) => {
   return true;
 };
 
-// Request OTP
+// Request OTP - Deprecated in favor of Firebase phone auth on the client
 const requestOTP = async (req, res) => {
-  console.log('=== requestOTP called ===');
-  console.log('Request body:', req.body);
-  
-  try {
-    const { number } = req.body;
-    console.log('Phone number received:', number);
-
-    if (!number) {
-      console.log('Validation failed: Phone number is required');
-      return res.status(400).json(
-        apiResponse(400, false, 'Phone number is required')
-      );
-    }
-
-    // Validate phone number format
-    const phoneRegex = /^[+]?[\d\s\-\(\)]+$/;
-    if (!phoneRegex.test(number)) {
-      console.log('Validation failed: Invalid phone number format');
-      return res.status(400).json(
-        apiResponse(400, false, 'Invalid phone number format')
-      );
-    }
-
-    console.log('Phone number validation passed');
-
-    let user = await User.findOne({ number });
-
-    if (!user) {
-      console.log('User not found, creating new user');
-      // Create new user with OTP
-      const otp = generateOTP();
-      user = new User({
-        number,
-        otp,
-        isProfile: false
-      });
-      await user.save();
-      console.log('New user created:', user._id);
-    } else {
-      console.log('Existing user found:', user._id);
-      // Update existing user's OTP
-      const otp = generateOTP();
-      await user.updateOTP(otp);
-      console.log('OTP updated for existing user');
-    }
-
-    // Send OTP (in real app, integrate with SMS service)
-    console.log('Sending OTP to user...');
-    await sendOTP(number, user.otp);
-    console.log('OTP sent successfully');
-
-    res.status(200).json(
-      apiResponse(200, true, 'OTP sent successfully', {
-        number: user.number,
-        isProfile: user.isProfile
-      })
-    );
-
-  } catch (error) {
-    console.error('Request OTP error:', error);
-    res.status(500).json(
-      apiResponse(500, false, 'Failed to send OTP')
-    );
-  }
+  return res.status(410).json(
+    apiResponse(410, false, 'Deprecated. Use Firebase phone auth on the client and POST /api/users/firebase-login with idToken.')
+  );
 };
 
-// Verify OTP and login
+// Verify OTP - Deprecated in favor of client-side Firebase confirmation + /firebase-login
 const verifyOTP = async (req, res) => {
-  console.log('=== verifyOTP called ===');
-  console.log('Request body:', req.body);
-  
-  try {
-    const { number, otp } = req.body;
-    console.log('Verification attempt - number:', number, 'OTP:', otp);
-
-    if (!number || !otp) {
-      console.log('Validation failed: Missing number or OTP');
-      return res.status(400).json(
-        apiResponse(400, false, 'Phone number and OTP are required')
-      );
-    }
-
-    console.log('Input validation passed');
-
-    const user = await User.findOne({ number });
-
-    if (!user) {
-      console.log('User not found for OTP verification:', number);
-      return res.status(404).json(
-        apiResponse(404, false, 'User not found')
-      );
-    }
-
-    console.log('User found:', user._id);
-
-    // Verify OTP
-    if (!user.verifyOTP(otp)) {
-      console.log('OTP verification failed for user:', user._id);
-      return res.status(400).json(
-        apiResponse(400, false, 'Invalid OTP')
-      );
-    }
-
-    console.log('OTP verification successful');
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        number: user.number, 
-        role: 'user',
-        isProfile: user.isProfile
-      },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
-    console.log('JWT token generated for user:', user._id);
-
-    res.status(200).json(
-      apiResponse(200, true, 'OTP verified successfully', {
-        userId: user._id,
-        number: user.number,
-        isProfile: user.isProfile,
-        token
-      })
-    );
-
-  } catch (error) {
-    console.error('Verify OTP error:', error);
-    res.status(500).json(
-      apiResponse(500, false, 'Failed to verify OTP')
-    );
-  }
+  return res.status(410).json(
+    apiResponse(410, false, 'Deprecated. Use Firebase phone auth on the client and POST /api/users/firebase-login with idToken.')
+  );
 };
 
 // Get user profile
@@ -387,3 +265,61 @@ module.exports = {
   deleteProfileImage,
   checkProfileStatus
 };
+
+// Firebase user login/verify using ID token
+// Accepts: { idToken: string }
+// Creates user if not exists (by firebaseUid or phone_number), then issues our JWT
+async function loginWithFirebase(req, res) {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json(apiResponse(400, false, 'idToken is required'));
+    }
+
+    const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+    const firebaseUid = decoded.uid;
+    const phone = decoded.phone_number || null;
+
+    let user = await User.findOne({ firebaseUid });
+    if (!user && phone) {
+      user = await User.findOne({ number: phone });
+    }
+
+    if (!user) {
+      user = new User({
+        firebaseUid,
+        number: phone || `uid:${firebaseUid}`,
+        isProfile: false,
+      });
+    } else if (!user.firebaseUid) {
+      user.firebaseUid = firebaseUid;
+    }
+
+    await user.save();
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        number: user.number,
+        role: 'user',
+        isProfile: user.isProfile,
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json(
+      apiResponse(200, true, 'Firebase login successful', {
+        userId: user._id,
+        number: user.number,
+        isProfile: user.isProfile,
+        token,
+      })
+    );
+  } catch (error) {
+    console.error('User Firebase login error:', error);
+    return res.status(401).json(apiResponse(401, false, 'Invalid Firebase ID token'));
+  }
+}
+
+module.exports.loginWithFirebase = loginWithFirebase;

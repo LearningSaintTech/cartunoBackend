@@ -1,0 +1,271 @@
+{
+  "info": {
+    "name": "Cartuno Orders API",
+    "description": "Simple Postman collection for Cartuno Order Management APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:5000/api/orders",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "your_user_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "your_admin_jwt_token_here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+                 "body": {
+           "mode": "raw",
+           "raw": "{\n  \"shippingAddressId\": \"68a71fc4214361f49d79e7ce\",\n  \"billingAddressId\": \"68a71fc4214361f49d79e7ce\",\n  \"paymentMethod\": \"cod\",\n  \"notes\": \"Please deliver in the morning\",\n  \"tax\": 50,\n  \"shippingCharges\": 100,\n  \"discount\": 0\n}"
+         },
+        "url": {
+          "raw": "{{baseURL}}/",
+          "host": ["{{baseURL}}"],
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "Get My Orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/my-orders?page=1&limit=10",
+          "host": ["{{baseURL}}"],
+          "path": ["my-orders"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Order by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE"]
+        }
+      }
+    },
+    {
+      "name": "Cancel Order",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
+        },
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE/cancel",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE", "cancel"]
+        }
+      }
+    },
+    {
+      "name": "Return Order",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Wrong size received\"\n}"
+        },
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE/return",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE", "return"]
+        }
+      }
+    },
+    {
+      "name": "Reorder",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE/reorder",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE", "reorder"]
+        }
+      }
+    },
+    {
+      "name": "Get My Stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/stats/my-stats",
+          "host": ["{{baseURL}}"],
+          "path": ["stats", "my-stats"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Get All Orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/admin/all?page=1&limit=20",
+          "host": ["{{baseURL}}"],
+          "path": ["admin", "all"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin - Update Order Status",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"shipped\",\n  \"notes\": \"Order has been shipped\"\n}"
+        },
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE/status",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE", "status"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Add Tracking",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"trackingNumber\": \"TRK123456789\",\n  \"courier\": \"Express Delivery\"\n}"
+        },
+        "url": {
+          "raw": "{{baseURL}}/ORDER_ID_HERE/tracking",
+          "host": ["{{baseURL}}"],
+          "path": ["ORDER_ID_HERE", "tracking"]
+        }
+      }
+    }
+  ]
+}

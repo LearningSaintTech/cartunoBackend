@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+  },
   number: {
     type: String,
     required: true,
@@ -10,10 +16,10 @@ const userSchema = new mongoose.Schema({
   },
   otp: {
     type: String,
-    required: true,
-    length: 6,
+    required: false,
     minlength: 6,
-    maxlength: 6
+    maxlength: 6,
+    default: null,
   },
   isProfile: {
     type: Boolean,
@@ -57,8 +63,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-userSchema.index({ number: 1 });
+// Index for faster queries (avoid duplicates; unique indexes are created from field definitions)
 userSchema.index({ email: 1 });
 userSchema.index({ isProfile: 1 });
 

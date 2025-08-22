@@ -1,0 +1,376 @@
+{
+  "orderAPIs": {
+    "description": "Complete Order Management System APIs for Cartuno E-commerce",
+    "baseURL": "http://localhost:5000/api/orders",
+    "authentication": "Bearer token required in Authorization header",
+    "endpoints": {
+      "createOrder": {
+        "method": "POST",
+        "url": "/",
+        "description": "Create a new order from user's cart",
+        "headers": {
+          "Authorization": "Bearer <user_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "shippingAddressId": "64f8a1b2c3d4e5f6a7b8c9d0",
+          "billingAddressId": "64f8a1b2c3d4e5f6a7b8c9d0",
+          "paymentMethod": "cod",
+          "notes": "Please deliver in the morning",
+          "tax": 50,
+          "shippingCharges": 100,
+          "discount": 0
+        },
+        "response": {
+          "success": true,
+          "message": "Order created successfully",
+          "data": {
+            "order": {
+              "orderNumber": "ORD1234567890123",
+              "user": "64f8a1b2c3d4e5f6a7b8c9d0",
+              "items": [...],
+              "shippingAddress": {...},
+              "billingAddress": {...},
+              "status": "pending",
+              "paymentStatus": "pending",
+              "paymentMethod": "cod",
+              "subtotal": 1500,
+              "tax": 50,
+              "shippingCharges": 100,
+              "discount": 0,
+              "totalAmount": 1650
+            },
+            "orderSummary": {
+              "orderNumber": "ORD1234567890123",
+              "status": "pending",
+              "totalItems": 3,
+              "totalAmount": 1650,
+              "estimatedDelivery": null
+            }
+          }
+        }
+      },
+      "getUserOrders": {
+        "method": "GET",
+        "url": "/my-orders",
+        "description": "Get user's orders with pagination and filtering",
+        "headers": {
+          "Authorization": "Bearer <user_token>"
+        },
+        "queryParams": {
+          "page": "1",
+          "limit": "10",
+          "status": "pending",
+          "paymentStatus": "paid"
+        },
+        "response": {
+          "success": true,
+          "message": "User orders retrieved successfully",
+          "data": {
+            "orders": [...],
+            "pagination": {
+              "currentPage": 1,
+              "totalPages": 3,
+              "totalOrders": 25,
+              "hasNext": true,
+              "hasPrev": false
+            }
+          }
+        }
+      },
+      "getOrderById": {
+        "method": "GET",
+        "url": "/:orderId",
+        "description": "Get specific order details by ID",
+        "headers": {
+          "Authorization": "Bearer <user_token>"
+        },
+        "response": {
+          "success": true,
+          "message": "Order retrieved successfully",
+          "data": {
+            "order": {...},
+            "orderSummary": {...},
+            "statusTimeline": [
+              {
+                "status": "Order Placed",
+                "date": "2024-01-15T10:30:00.000Z",
+                "description": "Order has been placed successfully"
+              }
+            ]
+          }
+        }
+      },
+      "cancelOrder": {
+        "method": "PUT",
+        "url": "/:orderId/cancel",
+        "description": "Cancel an order (only pending/confirmed orders)",
+        "headers": {
+          "Authorization": "Bearer <user_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "reason": "Changed my mind"
+        },
+        "response": {
+          "success": true,
+          "message": "Order cancelled successfully",
+          "data": {
+            "order": {...}
+          }
+        }
+      },
+      "returnOrder": {
+        "method": "PUT",
+        "url": "/:orderId/return",
+        "description": "Initiate order return (only delivered orders within 7 days)",
+        "headers": {
+          "Authorization": "Bearer <user_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "reason": "Wrong size received"
+        },
+        "response": {
+          "success": true,
+          "message": "Order return initiated successfully",
+          "data": {
+            "order": {...}
+          }
+        }
+      },
+      "reorder": {
+        "method": "POST",
+        "url": "/:orderId/reorder",
+        "description": "Add items from previous order to cart",
+        "headers": {
+          "Authorization": "Bearer <user_token>"
+        },
+        "response": {
+          "success": true,
+          "message": "Items added to cart for reorder",
+          "data": {
+            "addedToCart": 2,
+            "unavailableItems": [
+              {
+                "itemName": "Classic T-Shirt",
+                "reason": "Size M no longer available"
+              }
+            ],
+            "cartSummary": {
+              "totalItems": 5,
+              "totalAmount": 2500
+            }
+          }
+        }
+      },
+      "getUserStats": {
+        "method": "GET",
+        "url": "/stats/my-stats",
+        "description": "Get user's order statistics",
+        "headers": {
+          "Authorization": "Bearer <user_token>"
+        },
+        "queryParams": {
+          "startDate": "2024-01-01",
+          "endDate": "2024-01-31"
+        },
+        "response": {
+          "success": true,
+          "message": "Order statistics retrieved successfully",
+          "data": {
+            "orderStats": [
+              {
+                "_id": "pending",
+                "count": 2,
+                "totalAmount": 3300
+              },
+              {
+                "_id": "delivered",
+                "count": 5,
+                "totalAmount": 8250
+              }
+            ],
+            "revenueStats": [
+              {
+                "_id": {
+                  "year": 2024,
+                  "month": 1,
+                  "day": 15
+                },
+                "revenue": 1650,
+                "orderCount": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    "adminEndpoints": {
+      "getAllOrders": {
+        "method": "GET",
+        "url": "/admin/all",
+        "description": "Get all orders with pagination, filtering, and search (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>"
+        },
+        "queryParams": {
+          "page": "1",
+          "limit": "20",
+          "status": "pending",
+          "paymentStatus": "paid",
+          "startDate": "2024-01-01",
+          "endDate": "2024-01-31",
+          "search": "ORD123"
+        }
+      },
+      "getOrdersByStatus": {
+        "method": "GET",
+        "url": "/admin/status/:status",
+        "description": "Get orders by specific status (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>"
+        },
+        "queryParams": {
+          "page": "1",
+          "limit": "20",
+          "userId": "64f8a1b2c3d4e5f6a7b8c9d0"
+        }
+      },
+      "updateOrderStatus": {
+        "method": "PUT",
+        "url": "/:orderId/status",
+        "description": "Update order status (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "shipped",
+          "notes": "Order has been shipped via Express Delivery"
+        }
+      },
+      "updatePaymentStatus": {
+        "method": "PUT",
+        "url": "/:orderId/payment-status",
+        "description": "Update payment status (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "paymentStatus": "paid",
+          "paymentDetails": {
+            "transactionId": "TXN123456789",
+            "paymentGateway": "Razorpay",
+            "paymentDate": "2024-01-15T10:30:00.000Z"
+          }
+        }
+      },
+      "addTrackingInfo": {
+        "method": "PUT",
+        "url": "/:orderId/tracking",
+        "description": "Add tracking information (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "trackingNumber": "TRK123456789",
+          "courier": "Express Delivery"
+        }
+      },
+      "getAdminStats": {
+        "method": "GET",
+        "url": "/admin/stats",
+        "description": "Get order statistics for admin dashboard (admin only)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>"
+        }
+      },
+      "deleteOrder": {
+        "method": "DELETE",
+        "url": "/:orderId",
+        "description": "Delete order (admin only - soft delete)",
+        "headers": {
+          "Authorization": "Bearer <admin_token>"
+        }
+      }
+    },
+    "webhookEndpoints": {
+      "paymentWebhook": {
+        "method": "POST",
+        "url": "/webhook/payment",
+        "description": "Payment webhook for updating payment status",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "orderId": "64f8a1b2c3d4e5f6a7b8c9d0",
+          "paymentStatus": "paid",
+          "paymentDetails": {
+            "transactionId": "TXN123456789",
+            "paymentGateway": "Razorpay",
+            "paymentDate": "2024-01-15T10:30:00.000Z"
+          }
+        }
+      }
+    }
+  },
+  "orderStatuses": {
+    "pending": "Order placed but not yet confirmed",
+    "confirmed": "Order confirmed and being processed",
+    "processing": "Order is being prepared for shipping",
+    "shipped": "Order has been shipped",
+    "out_for_delivery": "Order is out for delivery",
+    "delivered": "Order has been delivered successfully",
+    "cancelled": "Order has been cancelled",
+    "returned": "Order has been returned",
+    "refunded": "Order has been refunded"
+  },
+  "paymentStatuses": {
+    "pending": "Payment is pending",
+    "paid": "Payment has been received",
+    "failed": "Payment has failed",
+    "refunded": "Payment has been refunded",
+    "partially_refunded": "Partial refund has been processed"
+  },
+  "paymentMethods": {
+    "cod": "Cash on Delivery",
+    "online": "Online Payment",
+    "wallet": "Digital Wallet",
+    "upi": "UPI Payment"
+  },
+  "testing": {
+    "createOrder": {
+      "description": "Test creating an order from cart",
+      "prerequisites": [
+        "User must be authenticated",
+        "User must have items in cart",
+        "User must have valid shipping and billing addresses"
+      ],
+      "testSteps": [
+        "1. Add items to cart",
+        "2. Create shipping and billing addresses",
+        "3. Call createOrder API",
+        "4. Verify order is created",
+        "5. Verify cart is cleared",
+        "6. Verify stock is updated"
+      ]
+    },
+    "orderStatusFlow": {
+      "description": "Test order status transitions",
+      "validTransitions": {
+        "pending": ["confirmed", "cancelled"],
+        "confirmed": ["processing", "cancelled"],
+        "processing": ["shipped", "cancelled"],
+        "shipped": ["out_for_delivery", "delivered"],
+        "out_for_delivery": ["delivered"],
+        "delivered": ["returned"],
+        "cancelled": [],
+        "returned": ["refunded"],
+        "refunded": []
+      }
+    }
+  }
+}

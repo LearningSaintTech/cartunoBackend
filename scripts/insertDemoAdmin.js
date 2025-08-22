@@ -1,16 +1,25 @@
 const mongoose = require('mongoose');
 const Admin = require('../models/admin');
+const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 // Database connection configuration
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/kartuno';
 
-// Demo admin data
-const demoAdmin = {
-  number: '+919876543210', // Demo phone number
-  password: 'admin123',    // Demo password
+// Production admin data
+const productionAdmin = {
+  number: '9170412775', // Replace with the desired production admin phone number
+  firebaseUid: `uid_${uuidv4()}`, // Unique Firebase UID for authentication
   role: 'admin',
   isActive: true
+};
+
+// Phone number validation regex (matches Admin model)
+const phoneRegex = /^[+]?[\d\s\-\(\)]+$/;
+
+// Function to validate phone number
+const validatePhoneNumber = (number) => {
+  return phoneRegex.test(number) && number.replace(/[\s\-\(\)]/g, '').length >= 10;
 };
 
 // Function to connect to database
@@ -38,140 +47,59 @@ const checkExistingAdmin = async (phoneNumber) => {
   }
 };
 
-// Function to insert demo admin
-const insertDemoAdmin = async () => {
+// Function to seed production admin
+const seedProductionAdmin = async () => {
   try {
-    console.log('🔍 Checking for existing admin...');
-    
+    console.log('🔍 Checking for existing production admin...');
+
+    // Validate phone number
+    if (!validatePhoneNumber(productionAdmin.number)) {
+      console.error(`❌ Invalid phone number format: ${productionAdmin.number}`);
+      console.log('💡 Phone number must include country code (e.g., +91) and be at least 10 digits.');
+      return;
+    }
+
     // Check if admin already exists
-    const existingAdmin = await checkExistingAdmin(demoAdmin.number);
-    
+    const existingAdmin = await checkExistingAdmin(productionAdmin.number);
+
     if (existingAdmin) {
-      console.log('⚠️  Admin with this phone number already exists:');
+      console.log(`⚠️  Admin with phone number ${productionAdmin.number} already exists:`);
       console.log(`   Phone: ${existingAdmin.number}`);
+      console.log(`   Firebase UID: ${existingAdmin.firebaseUid || 'Not set'}`);
       console.log(`   Role: ${existingAdmin.role}`);
       console.log(`   Status: ${existingAdmin.isActive ? 'Active' : 'Inactive'}`);
       console.log(`   Created: ${existingAdmin.createdAt}`);
-      
-      // Ask if user wants to update the existing admin
-      console.log('\n💡 To update the existing admin, run this script with --update flag');
-      console.log('   Example: node scripts/insertDemoAdmin.js --update');
-      
+      console.log('\n💡 This admin can be used for Firebase OTP authentication.');
       return;
     }
 
-    console.log('📝 Creating demo admin...');
-    
+    console.log(`📝 Creating production admin for ${productionAdmin.number}...`);
+
     // Create new admin
-    const newAdmin = new Admin(demoAdmin);
+    const newAdmin = new Admin({
+      number: productionAdmin.number,
+      firebaseUid: productionAdmin.firebaseUid,
+      role: productionAdmin.role,
+      isActive: productionAdmin.isActive
+    });
+
     await newAdmin.save();
-    
-    console.log('✅ Demo admin created successfully!');
+
+    console.log(`✅ Production admin created successfully for ${productionAdmin.number}!`);
     console.log('📋 Admin Details:');
     console.log(`   Phone: ${newAdmin.number}`);
+    console.log(`   Firebase UID: ${newAdmin.firebaseUid}`);
     console.log(`   Role: ${newAdmin.role}`);
     console.log(`   Status: ${newAdmin.isActive ? 'Active' : 'Inactive'}`);
     console.log(`   Created: ${newAdmin.createdAt}`);
-    console.log('\n🔑 Login Credentials:');
-    console.log(`   Phone: ${demoAdmin.number}`);
-    console.log(`   Password: ${demoAdmin.password}`);
-    console.log('\n⚠️  IMPORTANT: Change the password after first login!');
-    
+    console.log('\n🔑 Use Firebase phone authentication to log in with this number.');
+    console.log('⚠️  Ensure this number is registered with Firebase for OTP authentication.');
+
   } catch (error) {
-    console.error('❌ Error creating demo admin:', error.message);
-    
+    console.error('❌ Error creating production admin:', error.message);
     if (error.code === 11000) {
-      console.log('💡 This phone number is already registered. Use --update flag to modify existing admin.');
+      console.log('💡 Phone number or Firebase UID is already registered.');
     }
-  }
-};
-
-// Function to update existing admin
-const updateExistingAdmin = async () => {
-  try {
-    console.log('🔍 Finding existing admin...');
-    
-    const existingAdmin = await Admin.findOne({ number: demoAdmin.number });
-    
-    if (!existingAdmin) {
-      console.log('❌ No admin found with this phone number. Run without --update flag to create new admin.');
-      return;
-    }
-    
-    console.log('📝 Updating existing admin...');
-    
-    // Update admin fields
-    existingAdmin.password = demoAdmin.password;
-    existingAdmin.isActive = demoAdmin.isActive;
-    existingAdmin.role = demoAdmin.role;
-    
-    await existingAdmin.save();
-    
-    console.log('✅ Demo admin updated successfully!');
-    console.log('📋 Updated Admin Details:');
-    console.log(`   Phone: ${existingAdmin.number}`);
-    console.log(`   Role: ${existingAdmin.role}`);
-    console.log(`   Status: ${existingAdmin.isActive ? 'Active' : 'Inactive'}`);
-    console.log(`   Updated: ${existingAdmin.updatedAt}`);
-    console.log('\n🔑 Updated Login Credentials:');
-    console.log(`   Phone: ${demoAdmin.number}`);
-    console.log(`   Password: ${demoAdmin.password}`);
-    console.log('\n⚠️  IMPORTANT: Change the password after login!');
-    
-  } catch (error) {
-    console.error('❌ Error updating demo admin:', error.message);
-  }
-};
-
-// Function to list all admins
-const listAllAdmins = async () => {
-  try {
-    console.log('📋 Listing all admins...');
-    
-    const admins = await Admin.find({}).select('number role isActive createdAt lastLogin');
-    
-    if (admins.length === 0) {
-      console.log('❌ No admins found in database');
-      return;
-    }
-    
-    console.log(`✅ Found ${admins.length} admin(s):\n`);
-    
-    admins.forEach((admin, index) => {
-      console.log(`${index + 1}. Admin Details:`);
-      console.log(`   Phone: ${admin.number}`);
-      console.log(`   Role: ${admin.role}`);
-      console.log(`   Status: ${admin.isActive ? 'Active' : 'Inactive'}`);
-      console.log(`   Created: ${admin.createdAt}`);
-      console.log(`   Last Login: ${admin.lastLogin ? admin.lastLogin : 'Never'}`);
-      console.log('');
-    });
-    
-  } catch (error) {
-    console.error('❌ Error listing admins:', error.message);
-  }
-};
-
-// Function to delete demo admin
-const deleteDemoAdmin = async () => {
-  try {
-    console.log('🗑️  Deleting demo admin...');
-    
-    const deletedAdmin = await Admin.findOneAndDelete({ number: demoAdmin.number });
-    
-    if (!deletedAdmin) {
-      console.log('❌ No admin found with this phone number to delete');
-      return;
-    }
-    
-    console.log('✅ Demo admin deleted successfully!');
-    console.log('📋 Deleted Admin Details:');
-    console.log(`   Phone: ${deletedAdmin.number}`);
-    console.log(`   Role: ${deletedAdmin.role}`);
-    console.log(`   Status: ${deletedAdmin.isActive ? 'Active' : 'Inactive'}`);
-    
-  } catch (error) {
-    console.error('❌ Error deleting demo admin:', error.message);
   }
 };
 
@@ -180,34 +108,10 @@ const main = async () => {
   try {
     // Connect to database
     await connectDB();
-    
-    // Parse command line arguments
-    const args = process.argv.slice(2);
-    const command = args[0];
-    
-    switch (command) {
-      case '--update':
-        await updateExistingAdmin();
-        break;
-      case '--list':
-        await listAllAdmins();
-        break;
-      case '--delete':
-        await deleteDemoAdmin();
-        break;
-      case '--help':
-        console.log('📖 Demo Admin Script Usage:');
-        console.log('   node scripts/insertDemoAdmin.js          - Create new demo admin');
-        console.log('   node scripts/insertDemoAdmin.js --update - Update existing demo admin');
-        console.log('   node scripts/insertDemoAdmin.js --list   - List all admins');
-        console.log('   node scripts/insertDemoAdmin.js --delete - Delete demo admin');
-        console.log('   node scripts/insertDemoAdmin.js --help   - Show this help');
-        break;
-      default:
-        await insertDemoAdmin();
-        break;
-    }
-    
+
+    // Seed production admin
+    await seedProductionAdmin();
+
   } catch (error) {
     console.error('❌ Script execution error:', error.message);
   } finally {
@@ -224,8 +128,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  insertDemoAdmin,
-  updateExistingAdmin,
-  listAllAdmins,
-  deleteDemoAdmin
+  seedProductionAdmin
 };
