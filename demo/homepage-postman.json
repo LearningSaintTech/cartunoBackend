@@ -1,0 +1,372 @@
+{
+  "info": {
+    "name": "Cartuno - HomePage API",
+    "description": "Complete API collection for managing home page banners and content",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "YOUR_ADMIN_FIREBASE_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{adminToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Public Endpoints",
+      "item": [
+        {
+          "name": "Get Home Page Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage"]
+            },
+            "description": "Get complete home page data with all banners (no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Banners by Key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "hero",
+                  "description": "Banner key (hero, mobile, desktop, category)"
+                }
+              ]
+            },
+            "description": "Get banners for a specific key (no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Banner Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banner-keys",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banner-keys"]
+            },
+            "description": "Get all available banner keys (no authentication required)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Public endpoints that don't require authentication"
+    },
+    {
+      "name": "Admin Endpoints",
+      "item": [
+        {
+          "name": "Update Banner with URLs",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrls\": [\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero2.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero3.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "hero",
+                  "description": "Banner key to update"
+                }
+              ]
+            },
+            "description": "Update banner images with existing URLs (requires admin authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Banner Images",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select image files to upload (max 10 files, 10MB each)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero", "upload"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "hero",
+                  "description": "Banner key for upload"
+                }
+              ]
+            },
+            "description": "Upload new banner images and update banner (requires admin authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "hero",
+                  "description": "Banner key to remove"
+                }
+              ]
+            },
+            "description": "Remove entire banner and delete S3 images (requires admin authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Specific Banner Image",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero/images?imageUrl=https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero", "images"],
+              "query": [
+                {
+                  "key": "imageUrl",
+                  "value": "https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg",
+                  "description": "URL of image to delete"
+                }
+              ]
+            },
+            "description": "Delete specific image from banner (requires admin authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Home Page",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "reset"]
+            },
+            "description": "Reset home page to default state (requires admin authentication)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Admin endpoints that require authentication"
+    },
+    {
+      "name": "Example Banner Data",
+      "item": [
+        {
+          "name": "Hero Banner Example",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrls\": [\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero2.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/hero3.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/hero",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "hero"]
+            },
+            "description": "Example: Set hero banner with 3 images"
+          },
+          "response": []
+        },
+        {
+          "name": "Mobile Banner Example",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrls\": [\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/mobile1.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/mobile2.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/mobile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "mobile"]
+            },
+            "description": "Example: Set mobile banner with 2 images"
+          },
+          "response": []
+        },
+        {
+          "name": "Desktop Banner Example",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrls\": [\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/desktop1.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/desktop2.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/desktop3.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/desktop",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "desktop"]
+            },
+            "description": "Example: Set desktop banner with 3 images"
+          },
+          "response": []
+        },
+        {
+          "name": "Category Banner Example",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrls\": [\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/category1.jpg\",\n    \"https://yoraaecommerce.s3.amazonaws.com/banners/category2.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/homepage/banners/category",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "homepage", "banners", "category"]
+            },
+            "description": "Example: Set category banner with 2 images"
+          },
+          "response": []
+        }
+      ],
+      "description": "Example requests with sample banner data"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to set admin token if available",
+          "if (pm.environment.get('adminToken')) {",
+          "    pm.collectionVariables.set('adminToken', pm.environment.get('adminToken'));",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Test script to validate responses",
+          "pm.test('Status code is 200 or 201', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+          "});",
+          "",
+          "pm.test('Response has success property', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "pm.test('Response has message property', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('message');",
+          "});",
+          "",
+          "// Log response for debugging",
+          "console.log('Response:', pm.response.json());"
+        ]
+      }
+    }
+  ]
+}

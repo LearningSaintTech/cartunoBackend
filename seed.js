@@ -10,9 +10,10 @@ const Cart = require('./models/Cart');
 const Wishlist = require('./models/whishlist');
 const Order = require('./models/Order');
 const ReviewRating = require('./models/ReviewRating');
+const HomePage = require('./models/homePage');
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/kartuno', {
+mongoose.connect('mongodb://localhost:27017/cartuno', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
@@ -23,7 +24,7 @@ mongoose.connect('mongodb://localhost:27017/kartuno', {
 });
 
 // Sample S3 URL for images
-const baseImageUrl = 'https://yoraaecommerce.s3.ap-south-1.amazonaws.com/Nanocart/categories/680e356dc3b1f982b9b47f0e/subCategories/681dbc5c7f561979d06f8005/item/6853ee1bf905bf050432da82/1750330907839_img001.jpg';
+const baseImageUrl = 'https://yoraaecommerce.s3.amazonaws.com/promos/1755862165551_empty-classroom-desk-with-book-colored-pencils.jpg';
 
 // Seed function
 async function seedDatabase() {
@@ -41,6 +42,7 @@ async function seedDatabase() {
       Wishlist.deleteMany({}),
       Order.deleteMany({}),
       ReviewRating.deleteMany({}),
+      HomePage.deleteMany({}),
     ]);
     console.log('Cleared existing data');
 
@@ -415,6 +417,31 @@ async function seedDatabase() {
       },
     ]);
     console.log('Created review ratings');
+
+    // Create HomePage with sample banners
+    const homePage = await HomePage.create({
+      banners: new Map([
+        ['hero', [
+          'https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/hero2.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/hero3.jpg'
+        ]],
+        ['mobile', [
+          'https://yoraaecommerce.s3.amazonaws.com/banners/mobile1.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/mobile2.jpg'
+        ]],
+        ['desktop', [
+          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop1.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop2.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop3.jpg'
+        ]],
+        ['category', [
+          'https://yoraaecommerce.s3.amazonaws.com/banners/category1.jpg',
+          'https://yoraaecommerce.s3.amazonaws.com/banners/category2.jpg'
+        ]]
+      ])
+    });
+    console.log('Created home page with banners');
 
     console.log('Database seeding completed successfully!');
     mongoose.connection.close();

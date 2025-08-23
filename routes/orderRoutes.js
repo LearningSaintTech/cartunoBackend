@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 const { verifyAuth } = require('../middleware/auth');
-const adminAuth = require('../middleware/adminAuth');
 
 // Apply authentication middleware to all routes
-router.use(verifyAuth());
+router.use(verifyAuth([]));
 
 // ==================== USER ROUTES ====================
 
@@ -41,31 +40,31 @@ router.get('/stats/my-stats', orderController.getOrderStats);
 
 // Get all orders with pagination, filtering, and search (admin only)
 // GET /api/orders/admin/all
-router.get('/admin/all', adminAuth, orderController.getAllOrders);
+router.get('/admin/all', verifyAuth(['admin']), orderController.getAllOrders);
 
 // Get orders by specific status (admin only)
 // GET /api/orders/admin/status/:status
-router.get('/admin/status/:status', adminAuth, orderController.getOrdersByStatus);
+router.get('/admin/status/:status', verifyAuth(['admin']), orderController.getOrdersByStatus);
 
 // Update order status (admin only)
 // PUT /api/orders/:orderId/status
-router.put('/:orderId/status', adminAuth, orderController.updateOrderStatus);
+router.put('/:orderId/status', verifyAuth(['admin']), orderController.updateOrderStatus);
 
 // Update payment status (admin only)
 // PUT /api/orders/:orderId/payment-status
-router.put('/:orderId/payment-status', adminAuth, orderController.updatePaymentStatus);
+router.put('/:orderId/payment-status', verifyAuth(['admin']), orderController.updatePaymentStatus);
 
 // Add tracking information (admin only)
 // PUT /api/orders/:orderId/tracking
-router.put('/:orderId/tracking', adminAuth, orderController.addTrackingInfo);
+router.put('/:orderId/tracking', verifyAuth(['admin']), orderController.addTrackingInfo);
 
 // Get order statistics for admin dashboard (admin only)
 // GET /api/orders/admin/stats
-router.get('/admin/stats', adminAuth, orderController.getOrderStats);
+router.get('/admin/stats', verifyAuth(['admin']), orderController.getOrderStats);
 
 // Delete order (admin only - soft delete)
 // DELETE /api/orders/:orderId
-router.delete('/:orderId', adminAuth, orderController.deleteOrder);
+router.delete('/:orderId', verifyAuth(['admin']), orderController.deleteOrder);
 
 // ==================== WEBHOOK ROUTES (for payment gateways) ====================
 
