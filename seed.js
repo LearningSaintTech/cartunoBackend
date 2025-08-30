@@ -24,7 +24,7 @@ mongoose.connect('mongodb://localhost:27017/cartuno', {
 });
 
 // Sample S3 URL for images
-const baseImageUrl = 'https://yoraaecommerce.s3.amazonaws.com/promos/1755862165551_empty-classroom-desk-with-book-colored-pencils.jpg';
+const baseImageUrl = 'https://yoraaecommerce.s3.amazonaws.com/banners/hero/1756103008225_blue-back.PNG';
 
 // Seed function
 async function seedDatabase() {
@@ -422,22 +422,22 @@ async function seedDatabase() {
     const homePage = await HomePage.create({
       banners: new Map([
         ['hero', [
-          'https://yoraaecommerce.s3.amazonaws.com/banners/hero1.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/hero2.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/hero3.jpg'
+          baseImageUrl,
+          baseImageUrl,
+          baseImageUrl
         ]],
         ['mobile', [
-          'https://yoraaecommerce.s3.amazonaws.com/banners/mobile1.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/mobile2.jpg'
+          baseImageUrl,
+          baseImageUrl
         ]],
         ['desktop', [
-          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop1.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop2.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/desktop3.jpg'
+          baseImageUrl,
+          baseImageUrl,
+          baseImageUrl
         ]],
         ['category', [
-          'https://yoraaecommerce.s3.amazonaws.com/banners/category1.jpg',
-          'https://yoraaecommerce.s3.amazonaws.com/banners/category2.jpg'
+          baseImageUrl,
+          baseImageUrl
         ]]
       ])
     });

@@ -2061,6 +2061,164 @@ const getItemsByFilter = async (req, res) => {
   }
 };
 
+// Get best seller items based on order data
+const getBestSellers = async (req, res) => {
+  try {
+    const { 
+      limit = 10, 
+      categoryId, 
+      subcategoryId,
+      days = 30 // Default to last 30 days
+    } = req.query;
+
+    const Order = require('../models/order');
+    
+    // Calculate date range for best sellers
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - parseInt(days));
+
+    // Build match stage for aggregation
+    const matchStage = {
+      isActive: true,
+      status: { $in: ['confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'] },
+      createdAt: { $gte: startDate, $lte: endDate }
+    };
+
+    // Aggregate to find best selling items
+    const bestSellersData = await Order.aggregate([
+      { $match: matchStage },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.item',
+          totalQuantitySold: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.finalPrice', '$items.quantity'] } },
+          orderCount: { $sum: 1 }
+        }
+      },
+      { $sort: { totalQuantitySold: -1 } },
+      { $limit: parseInt(limit) * 2 } // Get more to filter by category/subcategory if needed
+    ]);
+
+    // Get item IDs
+    const itemIds = bestSellersData.map(item => item._id);
+
+    // Build query for items
+    const itemQuery = { _id: { $in: itemIds } };
+    if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+      itemQuery.categoryId = new mongoose.Types.ObjectId(categoryId);
+    }
+    if (subcategoryId && mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      itemQuery.subcategoryId = new mongoose.Types.ObjectId(subcategoryId);
+    }
+
+    // Fetch items with category and subcategory filtering
+    const items = await Item.find(itemQuery)
+      .populate('categoryId', 'name')
+      .populate('subcategoryId', 'name')
+      .limit(parseInt(limit));
+
+    // Merge sales data with item data
+    const bestSellers = items.map(item => {
+      const salesData = bestSellersData.find(data => data._id.toString() === item._id.toString());
+      return {
+        ...item.toObject(),
+        salesStats: {
+          totalQuantitySold: salesData?.totalQuantitySold || 0,
+          totalRevenue: salesData?.totalRevenue || 0,
+          orderCount: salesData?.orderCount || 0
+        },
+        finalPrice: item.discountPrice && item.discountPrice > 0 
+          ? item.discountPrice 
+          : item.discountPercentage > 0 
+            ? item.price * (1 - item.discountPercentage / 100)
+            : item.price
+      };
+    });
+
+    // Sort by quantity sold
+    bestSellers.sort((a, b) => b.salesStats.totalQuantitySold - a.salesStats.totalQuantitySold);
+
+    res.json(apiResponse(200, true, 'Best sellers retrieved successfully', {
+      items: bestSellers,
+      count: bestSellers.length,
+      dateRange: {
+        startDate,
+        endDate,
+        days: parseInt(days)
+      }
+    }));
+
+  } catch (error) {
+    console.error('Error getting best sellers:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to retrieve best sellers', error.message));
+  }
+};
+
+// Get new arrival items
+const getNewArrivals = async (req, res) => {
+  try {
+    const { 
+      limit = 10, 
+      categoryId, 
+      subcategoryId,
+      days = 7 // Default to last 7 days for new arrivals
+    } = req.query;
+
+    // Calculate date range for new arrivals
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - parseInt(days));
+
+    // Build query
+    const query = {
+      createdAt: { $gte: startDate, $lte: endDate }
+    };
+
+    if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+      query.categoryId = new mongoose.Types.ObjectId(categoryId);
+    }
+
+    if (subcategoryId && mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      query.subcategoryId = new mongoose.Types.ObjectId(subcategoryId);
+    }
+
+    // Fetch new arrival items
+    const newArrivals = await Item.find(query)
+      .populate('categoryId', 'name')
+      .populate('subcategoryId', 'name')
+      .sort({ createdAt: -1 }) // Most recent first
+      .limit(parseInt(limit));
+
+    // Add final price calculation
+    const newArrivalsWithPrice = newArrivals.map(item => ({
+      ...item.toObject(),
+      finalPrice: item.discountPrice && item.discountPrice > 0 
+        ? item.discountPrice 
+        : item.discountPercentage > 0 
+          ? item.price * (1 - item.discountPercentage / 100)
+          : item.price,
+      isNew: true,
+      daysOld: Math.floor((endDate - item.createdAt) / (1000 * 60 * 60 * 24))
+    }));
+
+    res.json(apiResponse(200, true, 'New arrivals retrieved successfully', {
+      items: newArrivalsWithPrice,
+      count: newArrivalsWithPrice.length,
+      dateRange: {
+        startDate,
+        endDate,
+        days: parseInt(days)
+      }
+    }));
+
+  } catch (error) {
+    console.error('Error getting new arrivals:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to retrieve new arrivals', error.message));
+  }
+};
+
 module.exports = {
   createItem,
   getAllItems,
@@ -2082,5 +2240,7 @@ module.exports = {
   addItemFilter,
   updateItemFilter,
   removeItemFilter,
-  getItemsByFilter
+  getItemsByFilter,
+  getBestSellers,
+  getNewArrivals
 };

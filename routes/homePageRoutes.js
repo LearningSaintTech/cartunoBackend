@@ -24,6 +24,8 @@ const upload = multer({
 router.get('/', homePageController.getHomePage);
 router.get('/banners/:key', homePageController.getBannersByKey);
 router.get('/banner-keys', homePageController.getAllBannerKeys);
+router.get('/best-sellers', homePageController.getHomePageBestSellers);
+router.get('/new-arrivals', homePageController.getHomePageNewArrivals);
 
 // Admin routes (require admin authentication)
 router.post('/banners/:key', verifyAuth(['admin']), upload.array('images', 10), homePageController.createBanner);

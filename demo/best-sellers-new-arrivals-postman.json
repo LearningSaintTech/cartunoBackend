@@ -1,0 +1,553 @@
+{
+  "info": {
+    "name": "Best Sellers & New Arrivals APIs",
+    "description": "Postman collection for testing Best Sellers and New Arrivals APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Item APIs",
+      "item": [
+        {
+          "name": "Get Best Sellers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/best-sellers?limit=10&days=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "best-sellers"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items to return (default: 10)"
+                },
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Date range in days for calculating best sellers (default: 30)"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "description": "Filter by specific category ID",
+                  "disabled": true
+                },
+                {
+                  "key": "subcategoryId",
+                  "value": "",
+                  "description": "Filter by specific subcategory ID",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get best-selling items based on order data from the last 30 days"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/items/best-sellers?limit=10&days=30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "items",
+                    "best-sellers"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "days",
+                      "value": "30"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Best sellers retrieved successfully\",\n  \"data\": {\n    \"items\": [\n      {\n        \"_id\": \"64a1b2c3d4e5f6789012345\",\n        \"name\": \"Premium Cotton T-Shirt\",\n        \"description\": \"High-quality cotton t-shirt\",\n        \"price\": 299,\n        \"discountPrice\": 249,\n        \"discountPercentage\": 0,\n        \"thumbnailImage\": \"https://example.com/image.jpg\",\n        \"categoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234a\",\n          \"name\": \"Clothing\"\n        },\n        \"subcategoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234b\",\n          \"name\": \"T-Shirts\"\n        },\n        \"variants\": [\n          {\n            \"size\": \"M\",\n            \"colors\": [\n              {\n                \"name\": \"Blue\",\n                \"hexCode\": \"#0066CC\",\n                \"images\": [\"https://example.com/blue.jpg\"],\n                \"sku\": \"TSH-BLU-M-001\",\n                \"stock\": 50\n              }\n            ]\n          }\n        ],\n        \"salesStats\": {\n          \"totalQuantitySold\": 125,\n          \"totalRevenue\": 31125,\n          \"orderCount\": 89\n        },\n        \"finalPrice\": 249,\n        \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n        \"updatedAt\": \"2024-01-20T14:45:00.000Z\"\n      }\n    ],\n    \"count\": 1,\n    \"dateRange\": {\n      \"startDate\": \"2024-01-01T00:00:00.000Z\",\n      \"endDate\": \"2024-01-31T23:59:59.999Z\",\n      \"days\": 30\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Best Sellers with Category Filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/best-sellers?limit=5&days=15&categoryId=64a1b2c3d4e5f678901234a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "best-sellers"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Number of items to return"
+                },
+                {
+                  "key": "days",
+                  "value": "15",
+                  "description": "Date range in days"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "64a1b2c3d4e5f678901234a",
+                  "description": "Filter by specific category ID"
+                }
+              ]
+            },
+            "description": "Get best sellers filtered by category from the last 15 days"
+          }
+        },
+        {
+          "name": "Get New Arrivals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/new-arrivals?limit=10&days=7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "new-arrivals"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items to return (default: 10)"
+                },
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "Date range in days for new arrivals (default: 7)"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "description": "Filter by specific category ID",
+                  "disabled": true
+                },
+                {
+                  "key": "subcategoryId",
+                  "value": "",
+                  "description": "Filter by specific subcategory ID",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get new arrival items from the last 7 days"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/items/new-arrivals?limit=10&days=7",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "items",
+                    "new-arrivals"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "days",
+                      "value": "7"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"New arrivals retrieved successfully\",\n  \"data\": {\n    \"items\": [\n      {\n        \"_id\": \"64a1b2c3d4e5f6789012346\",\n        \"name\": \"Latest Fashion Jacket\",\n        \"description\": \"Trendy jacket for the season\",\n        \"price\": 899,\n        \"discountPrice\": 0,\n        \"discountPercentage\": 15,\n        \"thumbnailImage\": \"https://example.com/jacket.jpg\",\n        \"categoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234a\",\n          \"name\": \"Clothing\"\n        },\n        \"subcategoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234c\",\n          \"name\": \"Jackets\"\n        },\n        \"variants\": [\n          {\n            \"size\": \"L\",\n            \"colors\": [\n              {\n                \"name\": \"Black\",\n                \"hexCode\": \"#000000\",\n                \"images\": [\"https://example.com/black-jacket.jpg\"],\n                \"sku\": \"JKT-BLK-L-001\",\n                \"stock\": 25\n              }\n            ]\n          }\n        ],\n        \"finalPrice\": 764.15,\n        \"isNew\": true,\n        \"daysOld\": 2,\n        \"createdAt\": \"2024-01-29T08:15:00.000Z\",\n        \"updatedAt\": \"2024-01-29T08:15:00.000Z\"\n      }\n    ],\n    \"count\": 1,\n    \"dateRange\": {\n      \"startDate\": \"2024-01-24T00:00:00.000Z\",\n      \"endDate\": \"2024-01-31T23:59:59.999Z\",\n      \"days\": 7\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get New Arrivals with Subcategory Filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/new-arrivals?limit=8&days=14&subcategoryId=64a1b2c3d4e5f678901234b",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "new-arrivals"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "description": "Number of items to return"
+                },
+                {
+                  "key": "days",
+                  "value": "14",
+                  "description": "Date range in days"
+                },
+                {
+                  "key": "subcategoryId",
+                  "value": "64a1b2c3d4e5f678901234b",
+                  "description": "Filter by specific subcategory ID"
+                }
+              ]
+            },
+            "description": "Get new arrivals filtered by subcategory from the last 14 days"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Homepage APIs",
+      "item": [
+        {
+          "name": "Get Homepage Best Sellers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homepage/best-sellers?limit=8",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homepage",
+                "best-sellers"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "description": "Number of items to return (default: 8)"
+                }
+              ]
+            },
+            "description": "Get best sellers with homepage banners for homepage display"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/homepage/best-sellers?limit=8",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "homepage",
+                    "best-sellers"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "8"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Homepage best sellers retrieved successfully\",\n  \"data\": {\n    \"bestSellers\": [\n      {\n        \"_id\": \"64a1b2c3d4e5f6789012345\",\n        \"name\": \"Premium Cotton T-Shirt\",\n        \"price\": 299,\n        \"discountPrice\": 249,\n        \"thumbnailImage\": \"https://example.com/image.jpg\",\n        \"categoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234a\",\n          \"name\": \"Clothing\"\n        },\n        \"salesStats\": {\n          \"totalQuantitySold\": 125,\n          \"totalRevenue\": 31125\n        },\n        \"finalPrice\": 249\n      }\n    ],\n    \"banners\": {\n      \"hero\": [\n        \"https://example.com/hero-banner1.jpg\",\n        \"https://example.com/hero-banner2.jpg\"\n      ],\n      \"promotional\": [\n        \"https://example.com/promo-banner.jpg\"\n      ]\n    },\n    \"count\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Homepage New Arrivals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homepage/new-arrivals?limit=8",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homepage",
+                "new-arrivals"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "8",
+                  "description": "Number of items to return (default: 8)"
+                }
+              ]
+            },
+            "description": "Get new arrivals with homepage banners for homepage display"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/homepage/new-arrivals?limit=8",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "homepage",
+                    "new-arrivals"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "8"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Homepage new arrivals retrieved successfully\",\n  \"data\": {\n    \"newArrivals\": [\n      {\n        \"_id\": \"64a1b2c3d4e5f6789012346\",\n        \"name\": \"Latest Fashion Jacket\",\n        \"price\": 899,\n        \"discountPercentage\": 15,\n        \"thumbnailImage\": \"https://example.com/jacket.jpg\",\n        \"categoryId\": {\n          \"_id\": \"64a1b2c3d4e5f678901234a\",\n          \"name\": \"Clothing\"\n        },\n        \"finalPrice\": 764.15,\n        \"isNew\": true,\n        \"daysOld\": 2\n      }\n    ],\n    \"banners\": {\n      \"hero\": [\n        \"https://example.com/hero-banner1.jpg\",\n        \"https://example.com/hero-banner2.jpg\"\n      ],\n      \"promotional\": [\n        \"https://example.com/promo-banner.jpg\"\n      ]\n    },\n    \"count\": 1\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Scenarios",
+      "item": [
+        {
+          "name": "Get Best Sellers - No Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/best-sellers?days=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "best-sellers"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "1",
+                  "description": "Very short date range to test empty results"
+                }
+              ]
+            },
+            "description": "Test best sellers API with very short date range (likely no data)"
+          }
+        },
+        {
+          "name": "Get New Arrivals - Extended Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/new-arrivals?limit=20&days=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "new-arrivals"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Higher limit to test pagination"
+                },
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Extended date range"
+                }
+              ]
+            },
+            "description": "Test new arrivals with extended date range and higher limit"
+          }
+        },
+        {
+          "name": "Get Best Sellers - Invalid Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/items/best-sellers?categoryId=invalid-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "items",
+                "best-sellers"
+              ],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "invalid-id",
+                  "description": "Invalid category ID to test validation"
+                }
+              ]
+            },
+            "description": "Test best sellers API with invalid category ID"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set dynamic base URL if needed",
+          "if (!pm.variables.get('baseUrl')) {",
+          "    pm.variables.set('baseUrl', 'http://localhost:3000/api');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Basic response validation",
+          "pm.test('Status code is 200', function () {",
+          "    pm.response.to.have.status(200);",
+          "});",
+          "",
+          "pm.test('Response has success property', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "    pm.expect(jsonData.success).to.be.true;",
+          "});",
+          "",
+          "pm.test('Response has data property', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('data');",
+          "});",
+          "",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});"
+        ]
+      }
+    }
+  ]
+}

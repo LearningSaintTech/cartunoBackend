@@ -202,3 +202,138 @@ exports.resetHomePage = async (req, res) => {
     res.status(500).json(errorResponse('Failed to reset home page', error.message));
   }
 };
+
+// Get homepage best sellers with banners
+exports.getHomePageBestSellers = async (req, res) => {
+  try {
+    const { limit = 8 } = req.query;
+    const Item = require('../models/item');
+    const Order = require('../models/order');
+    const mongoose = require('mongoose');
+
+    // Get home page banners
+    const homePage = await HomePage.getOrCreate();
+    
+    // Calculate date range for best sellers (last 30 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30);
+
+    // Aggregate to find best selling items
+    const bestSellersData = await Order.aggregate([
+      { 
+        $match: {
+          isActive: true,
+          status: { $in: ['confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'] },
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.item',
+          totalQuantitySold: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.finalPrice', '$items.quantity'] } }
+        }
+      },
+      { $sort: { totalQuantitySold: -1 } },
+      { $limit: parseInt(limit) }
+    ]);
+
+    // Get item details
+    const itemIds = bestSellersData.map(item => item._id);
+    const items = await Item.find({ _id: { $in: itemIds } })
+      .populate('categoryId', 'name')
+      .populate('subcategoryId', 'name');
+
+    // Merge sales data with item data
+    const bestSellers = items.map(item => {
+      const salesData = bestSellersData.find(data => data._id.toString() === item._id.toString());
+      return {
+        ...item.toObject(),
+        salesStats: {
+          totalQuantitySold: salesData?.totalQuantitySold || 0,
+          totalRevenue: salesData?.totalRevenue || 0
+        },
+        finalPrice: item.discountPrice && item.discountPrice > 0 
+          ? item.discountPrice 
+          : item.discountPercentage > 0 
+            ? item.price * (1 - item.discountPercentage / 100)
+            : item.price
+      };
+    });
+
+    // Sort by quantity sold
+    bestSellers.sort((a, b) => b.salesStats.totalQuantitySold - a.salesStats.totalQuantitySold);
+
+    // Convert banners Map to object
+    const banners = {};
+    homePage.banners.forEach((value, key) => {
+      banners[key] = value;
+    });
+
+    res.json(successResponse('Homepage best sellers retrieved successfully', {
+      bestSellers: bestSellers.slice(0, parseInt(limit)),
+      banners,
+      count: bestSellers.length
+    }));
+
+  } catch (error) {
+    console.error('Error getting homepage best sellers:', error);
+    res.status(500).json(errorResponse('Failed to retrieve homepage best sellers', error.message));
+  }
+};
+
+// Get homepage new arrivals with banners
+exports.getHomePageNewArrivals = async (req, res) => {
+  try {
+    const { limit = 8 } = req.query;
+    const Item = require('../models/item');
+    const mongoose = require('mongoose');
+
+    // Get home page banners
+    const homePage = await HomePage.getOrCreate();
+    
+    // Calculate date range for new arrivals (last 7 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
+
+    // Fetch new arrival items
+    const newArrivals = await Item.find({
+      createdAt: { $gte: startDate, $lte: endDate }
+    })
+      .populate('categoryId', 'name')
+      .populate('subcategoryId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit));
+
+    // Add final price calculation
+    const newArrivalsWithPrice = newArrivals.map(item => ({
+      ...item.toObject(),
+      finalPrice: item.discountPrice && item.discountPrice > 0 
+        ? item.discountPrice 
+        : item.discountPercentage > 0 
+          ? item.price * (1 - item.discountPercentage / 100)
+          : item.price,
+      isNew: true,
+      daysOld: Math.floor((endDate - item.createdAt) / (1000 * 60 * 60 * 24))
+    }));
+
+    // Convert banners Map to object
+    const banners = {};
+    homePage.banners.forEach((value, key) => {
+      banners[key] = value;
+    });
+
+    res.json(successResponse('Homepage new arrivals retrieved successfully', {
+      newArrivals: newArrivalsWithPrice,
+      banners,
+      count: newArrivalsWithPrice.length
+    }));
+
+  } catch (error) {
+    console.error('Error getting homepage new arrivals:', error);
+    res.status(500).json(errorResponse('Failed to retrieve homepage new arrivals', error.message));
+  }
+};
