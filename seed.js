@@ -24,7 +24,7 @@ mongoose.connect('mongodb://localhost:27017/cartuno', {
 });
 
 // Sample S3 URL for images
-const baseImageUrl = 'https://yoraaecommerce.s3.amazonaws.com/banners/hero/1756103008225_blue-back.PNG';
+const baseImageUrl = 'https://yoraaecommerce.s3.ap-south-1.amazonaws.com/banners/hero/1755934677582_blue-back.PNG';
 
 // Seed function
 async function seedDatabase() {

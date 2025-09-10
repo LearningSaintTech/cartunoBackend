@@ -38,7 +38,7 @@ const uploadImageToS3 = async (file, folderName) => {
         ContentType: contentType,
       });
       await s3.send(uploadCommand);
-      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
     } catch (err) {
       throw new Error("Single-part upload failed.");
     }
@@ -91,7 +91,7 @@ const uploadImageToS3 = async (file, folderName) => {
 
     await s3.send(completeUpload);
 
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
   } catch (error) {
     await s3.send(
       new AbortMultipartUploadCommand({
