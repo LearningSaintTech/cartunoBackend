@@ -270,33 +270,80 @@ module.exports = {
 // Accepts: { idToken: string }
 // Creates user if not exists (by firebaseUid or phone_number), then issues our JWT
 async function loginWithFirebase(req, res) {
+  console.group('🔥 BACKEND FIREBASE LOGIN DEBUG');
+  
   try {
     const { idToken } = req.body;
+    console.log('📥 Request received');
+    console.log('🎫 ID Token present:', !!idToken);
+    console.log('🎫 ID Token length:', idToken?.length);
+    console.log('🎫 ID Token preview:', idToken ? idToken.substring(0, 50) + '...' : 'MISSING');
+    
     if (!idToken) {
+      console.error('❌ No ID token provided');
+      console.groupEnd();
       return res.status(400).json(apiResponse(400, false, 'idToken is required'));
     }
 
+    console.log('🔐 Verifying Firebase ID token...');
+    console.log('🔐 Using Firebase Admin SDK for project:', firebaseAdmin.app().options.projectId);
+    
     const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+    console.log('✅ Firebase ID token verified successfully!');
+    console.log('✅ Decoded token data:', {
+      uid: decoded.uid,
+      phone_number: decoded.phone_number,
+      aud: decoded.aud,
+      iss: decoded.iss,
+      exp: new Date(decoded.exp * 1000).toISOString(),
+      iat: new Date(decoded.iat * 1000).toISOString()
+    });
+    
     const firebaseUid = decoded.uid;
     const phone = decoded.phone_number || null;
+    console.log('📱 Firebase UID:', firebaseUid);
+    console.log('📱 Phone number:', phone);
 
+    console.log('🔍 Searching for existing user...');
     let user = await User.findOne({ firebaseUid });
+    console.log('🔍 User found by firebaseUid:', !!user);
+    
     if (!user && phone) {
+      console.log('🔍 Searching by phone number...');
       user = await User.findOne({ number: phone });
+      console.log('🔍 User found by phone:', !!user);
     }
 
     if (!user) {
+      console.log('👤 Creating new user...');
       user = new User({
         firebaseUid,
         number: phone || `uid:${firebaseUid}`,
         isProfile: false,
       });
+      console.log('👤 New user created:', {
+        firebaseUid: user.firebaseUid,
+        number: user.number,
+        isProfile: user.isProfile
+      });
     } else if (!user.firebaseUid) {
+      console.log('🔗 Linking firebaseUid to existing user...');
       user.firebaseUid = firebaseUid;
+      console.log('🔗 User updated with firebaseUid');
+    } else {
+      console.log('👤 Existing user found:', {
+        id: user._id,
+        firebaseUid: user.firebaseUid,
+        number: user.number,
+        isProfile: user.isProfile
+      });
     }
 
+    console.log('💾 Saving user to database...');
     await user.save();
+    console.log('✅ User saved successfully');
 
+    console.log('🎫 Generating JWT token...');
     const token = jwt.sign(
       {
         userId: user._id,
@@ -307,17 +354,50 @@ async function loginWithFirebase(req, res) {
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     );
+    console.log('✅ JWT token generated');
+    console.log('🎫 Token length:', token.length);
 
+    const responseData = {
+      userId: user._id,
+      number: user.number,
+      isProfile: user.isProfile,
+      token,
+    };
+    
+    console.log('📤 Sending success response:', responseData);
+    console.groupEnd();
+    
     return res.status(200).json(
-      apiResponse(200, true, 'Firebase login successful', {
-        userId: user._id,
-        number: user.number,
-        isProfile: user.isProfile,
-        token,
-      })
+      apiResponse(200, true, 'Firebase login successful', responseData)
     );
   } catch (error) {
-    console.error('User Firebase login error:', error);
+    console.error('❌ User Firebase login error details:');
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Full error object:', error);
+    
+    // Detailed error analysis
+    console.group('🔍 Backend Error Analysis');
+    if (error.code === 'auth/argument-error') {
+      console.log('💡 Likely cause: Firebase ID token has wrong audience (aud) claim');
+      console.log('💡 Expected project:', firebaseAdmin.app().options.projectId);
+      console.log('💡 Token audience:', error.message.includes('Expected') ? 'Check error message' : 'Unknown');
+      console.log('💡 Solution: Ensure frontend and backend use same Firebase project');
+    } else if (error.code === 'auth/id-token-expired') {
+      console.log('💡 Likely cause: Firebase ID token has expired');
+      console.log('💡 Solution: Request a new token from frontend');
+    } else if (error.code === 'auth/invalid-id-token') {
+      console.log('💡 Likely cause: Firebase ID token is malformed');
+      console.log('💡 Solution: Check token generation in frontend');
+    } else {
+      console.log('💡 Unknown error code:', error.code);
+      console.log('💡 Check Firebase Admin SDK documentation');
+    }
+    console.groupEnd();
+    
+    console.groupEnd();
     return res.status(401).json(apiResponse(401, false, 'Invalid Firebase ID token'));
   }
 }

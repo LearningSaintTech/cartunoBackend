@@ -36,11 +36,13 @@ const uploadImageToS3 = async (file, folderName) => {
         Key: fileName,
         Body: file.buffer,
         ContentType: contentType,
+        // ACL removed - using bucket policy for public access instead
       });
       await s3.send(uploadCommand);
       return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
     } catch (err) {
-      throw new Error("Single-part upload failed.");
+      console.error(`S3 Upload Error Details:`, err);
+      throw new Error(`Single-part upload failed: ${err.message}`);
     }
   }
 
@@ -49,6 +51,7 @@ const uploadImageToS3 = async (file, folderName) => {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: fileName,
     ContentType: contentType,
+    // ACL removed - using bucket policy for public access instead
   });
 
   const uploadResponse = await s3.send(createUpload);

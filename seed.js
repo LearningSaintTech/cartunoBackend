@@ -13,7 +13,7 @@ const ReviewRating = require('./models/ReviewRating');
 const HomePage = require('./models/homePage');
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/cartuno', {
+mongoose.connect('mongodb://3.109.157.169:27017/cartuno', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
