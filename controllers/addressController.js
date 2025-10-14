@@ -129,7 +129,7 @@ const deleteAddress = async (req, res) => {
     }
 
     console.log('Address found for deletion:', address._id);
-    await address.remove();
+    await Address.findByIdAndDelete(req.params.id);
     console.log('Address deleted successfully');
     
     res.json(apiResponse(200, true, 'Address deleted successfully'));

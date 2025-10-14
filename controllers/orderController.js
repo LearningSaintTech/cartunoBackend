@@ -137,17 +137,30 @@ const createOrder = async (req, res) => {
     await order.save();
     console.log('[createOrder] ✅ Order saved:', order._id);
 
-    // Update stock for all items
+    // Update stock for all items using direct MongoDB update to bypass validations
     console.log('[createOrder] Updating stock...');
     for (const orderItem of orderItems) {
       console.log('[createOrder] Updating stock for item:', orderItem.item);
       const item = await Item.findById(orderItem.item);
       const variant = item.variants.find(v => v.size === orderItem.selectedVariant.size);
-      const color = variant.colors.find(c => c.name === orderItem.selectedVariant.color.name);
+      const colorIndex = variant.colors.findIndex(c => c.name === orderItem.selectedVariant.color.name);
       
-      console.log('[createOrder] Reducing stock:', { item: item.name, currentStock: color.stock, reduceBy: orderItem.quantity });
-      color.stock -= orderItem.quantity;
-      await item.save();
+      console.log('[createOrder] Reducing stock:', { 
+        item: item.name, 
+        currentStock: variant.colors[colorIndex].stock, 
+        reduceBy: orderItem.quantity 
+      });
+      
+      // Use direct MongoDB update to avoid triggering pre-save validations
+      const variantIndex = item.variants.findIndex(v => v.size === orderItem.selectedVariant.size);
+      await Item.updateOne(
+        { _id: orderItem.item },
+        { 
+          $inc: { 
+            [`variants.${variantIndex}.colors.${colorIndex}.stock`]: -orderItem.quantity 
+          } 
+        }
+      );
       console.log('[createOrder] Stock updated for:', item.name);
     }
     console.log('[createOrder] ✅ Stock updated successfully');
@@ -503,11 +516,24 @@ const cancelOrder = async (req, res) => {
       console.log('[cancelOrder] Processing item:', orderItem.item);
       const item = await Item.findById(orderItem.item);
       const variant = item.variants.find(v => v.size === orderItem.selectedVariant.size);
-      const color = variant.colors.find(c => c.name === orderItem.selectedVariant.color.name);
+      const colorIndex = variant.colors.findIndex(c => c.name === orderItem.selectedVariant.color.name);
       
-      console.log('[cancelOrder] Restoring stock:', { item: item.name, currentStock: color.stock, adding: orderItem.quantity });
-      color.stock += orderItem.quantity;
-      await item.save();
+      console.log('[cancelOrder] Restoring stock:', { 
+        item: item.name, 
+        currentStock: variant.colors[colorIndex].stock, 
+        adding: orderItem.quantity 
+      });
+      
+      // Use direct MongoDB update to avoid triggering pre-save validations
+      const variantIndex = item.variants.findIndex(v => v.size === orderItem.selectedVariant.size);
+      await Item.updateOne(
+        { _id: orderItem.item },
+        { 
+          $inc: { 
+            [`variants.${variantIndex}.colors.${colorIndex}.stock`]: orderItem.quantity 
+          } 
+        }
+      );
       console.log('[cancelOrder] Stock restored for:', item.name);
     }
     console.log('[cancelOrder] ✅ Stock restored');

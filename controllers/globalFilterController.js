@@ -167,7 +167,7 @@ const deleteGlobalFilter = async (req, res) => {
     }
 
     console.log('Global filter found for deletion:', globalFilter._id);
-    await globalFilter.remove();
+    await GlobalFilter.findByIdAndDelete(req.params.id);
     console.log('Global filter deleted successfully');
     
     res.json(apiResponse(200, true, 'Global filter deleted successfully'));

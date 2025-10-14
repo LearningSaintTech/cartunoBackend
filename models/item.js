@@ -12,6 +12,11 @@ const itemSchema = new mongoose.Schema({
     trim: true,
     maxlength: 2000
   },
+  shortDescription: {
+    type: String,
+    trim: true,
+    maxlength: 500
+  },
   price: {
     type: Number,
     min: 0,
