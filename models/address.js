@@ -24,9 +24,10 @@ const addressSchema = new mongoose.Schema({
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
-    maxlength: 100
+    maxlength: 100,
+    default: ''
   },
   phone: {
     type: String,
@@ -36,10 +37,17 @@ const addressSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email format']
+    validate: {
+      validator: function(v) {
+        // Only validate if email is provided
+        if (!v || v === '') return true;
+        return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+      },
+      message: 'Invalid email format'
+    }
   },
   addressLine1: {
     type: String,
@@ -98,7 +106,7 @@ addressSchema.index({ user: 1, isActive: 1 });
 
 // Virtual for full name
 addressSchema.virtual('fullName').get(function() {
-  return `${this.firstName} ${this.lastName}`;
+  return this.lastName ? `${this.firstName} ${this.lastName}` : this.firstName;
 });
 
 // Virtual for complete address

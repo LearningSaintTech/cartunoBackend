@@ -9,20 +9,23 @@ router.get('/', verifyAuth(['user']), wishlistController.getUserWishlist);
 // POST /api/wishlist - Add item to wishlist
 router.post('/', verifyAuth(['user']), wishlistController.addToWishlist);
 
+// IMPORTANT: Specific routes MUST come BEFORE parameterized routes
+// Otherwise Express will match /:itemId instead of /clear
+
+// DELETE /api/wishlist/clear - Clear entire wishlist (MUST be before /:itemId)
+router.delete('/clear', verifyAuth(['user']), wishlistController.clearWishlist);
+
+// GET /api/wishlist/stats - Get wishlist statistics (MUST be before /:itemId)
+router.get('/stats', verifyAuth(['user']), wishlistController.getWishlistStats);
+
 // DELETE /api/wishlist/:itemId - Remove item from wishlist
 router.delete('/:itemId', verifyAuth(['user']), wishlistController.removeFromWishlist);
 
 // PUT /api/wishlist/:itemId/notes - Update item notes in wishlist
 router.put('/:itemId/notes', verifyAuth(['user']), wishlistController.updateWishlistItemNotes);
 
-// DELETE /api/wishlist/clear - Clear entire wishlist
-router.delete('/clear', verifyAuth(['user']), wishlistController.clearWishlist);
-
 // GET /api/wishlist/:itemId/check - Check if item is in wishlist
 router.get('/:itemId/check', verifyAuth(['user']), wishlistController.checkItemInWishlist);
-
-// GET /api/wishlist/stats - Get wishlist statistics
-router.get('/stats', verifyAuth(['user']), wishlistController.getWishlistStats);
 
 // PATCH /api/wishlist/toggle-status - Toggle wishlist status
 router.patch('/toggle-status', verifyAuth(['user']), wishlistController.toggleWishlistStatus);

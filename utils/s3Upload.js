@@ -10,6 +10,14 @@ const {
 const mime = require("mime-types");
 require("dotenv").config();
 
+// Log all S3 configuration from .env
+console.log("=== S3 Configuration from .env ===");
+console.log("AWS_REGION:", process.env.AWS_REGION);
+console.log("AWS_S3_BUCKET_NAME:", process.env.AWS_S3_BUCKET_NAME);
+console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID ? `${process.env.AWS_ACCESS_KEY_ID.substring(0, 4)}...${process.env.AWS_ACCESS_KEY_ID.substring(process.env.AWS_ACCESS_KEY_ID.length - 4)}` : "NOT SET");
+console.log("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY ? `${process.env.AWS_SECRET_ACCESS_KEY.substring(0, 4)}...***` : "NOT SET");
+console.log("===================================\n");
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {

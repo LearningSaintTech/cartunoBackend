@@ -32,6 +32,13 @@ const createAddress = async (req, res) => {
     res.status(201).json(apiResponse(201, true, 'Address created successfully', address));
   } catch (error) {
     console.error('Error creating address:', error);
+    
+    // Better error messages for validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json(apiResponse(400, false, 'Validation failed', messages.join(', ')));
+    }
+    
     res.status(500).json(apiResponse(500, false, 'Failed to create address', error.message));
   }
 };
@@ -107,6 +114,13 @@ const updateAddress = async (req, res) => {
     res.json(apiResponse(200, true, 'Address updated successfully', updatedAddress));
   } catch (error) {
     console.error('Error updating address:', error);
+    
+    // Better error messages for validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json(apiResponse(400, false, 'Validation failed', messages.join(', ')));
+    }
+    
     res.status(500).json(apiResponse(500, false, 'Failed to update address', error.message));
   }
 };

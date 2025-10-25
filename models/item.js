@@ -341,46 +341,81 @@ itemSchema.statics.getDiscountedItems = function() {
 
 // New static method for advanced filtering
 itemSchema.statics.getByFilters = function(filterCriteria, options = {}) {
+  console.log('');
+  console.log('🗄️ ==================== MODEL: getByFilters() ====================');
+  console.log('📥 Filter Criteria:', JSON.stringify(filterCriteria, null, 2));
+  console.log('⚙️ Options:', JSON.stringify(options, null, 2));
+  console.log('');
+  
   const query = {};
   
   // Apply filter criteria
+  console.log('🔍 Building MongoDB query from filters...');
   if (filterCriteria && Object.keys(filterCriteria).length > 0) {
+    console.log('  Filter criteria has', Object.keys(filterCriteria).length, 'keys');
     const filterQueries = [];
     
     Object.entries(filterCriteria).forEach(([key, values]) => {
+      console.log(`  Processing filter: "${key}" with values:`, values);
+      
       if (values && values.length > 0) {
         // Support both single value and array of values
         const valueArray = Array.isArray(values) ? values : [values];
+        console.log(`    Converting to array:`, valueArray);
+        
+        // Lowercase values for case-insensitive matching
+        const lowercaseValues = valueArray.map(v => v.toLowerCase());
+        console.log(`    Lowercase values:`, lowercaseValues);
         
         // Create query for this filter key
         const filterQuery = {
-          'filters.key': key,
-          'filters.values': { $in: valueArray }
+          'filters.key': key.toLowerCase(),
+          'filters.values': { $in: lowercaseValues }
         };
         
+        console.log(`    ✅ Created filter query:`, JSON.stringify(filterQuery));
         filterQueries.push(filterQuery);
+      } else {
+        console.log(`    ⏭️ Skipping (empty or null)`);
       }
     });
     
     // If we have filter queries, add them to main query
     if (filterQueries.length > 0) {
       query.$and = filterQueries;
+      console.log('');
+      console.log('  ✅ Added', filterQueries.length, 'filter queries to main query using $and');
+      console.log('  Query.$and:', JSON.stringify(query.$and, null, 2));
+    } else {
+      console.log('  ⚠️ No valid filter queries created');
     }
+  } else {
+    console.log('  ⚠️ No filter criteria provided or empty object');
   }
   
   // Apply other query options
+  console.log('');
+  console.log('🔧 Adding other query criteria...');
   if (options.categoryId) {
     query.categoryId = options.categoryId;
+    console.log('  + Category ID:', options.categoryId);
   }
   
   if (options.subcategoryId) {
     query.subcategoryId = options.subcategoryId;
+    console.log('  + Subcategory ID:', options.subcategoryId);
   }
   
   if (options.minPrice || options.maxPrice) {
     query.price = {};
-    if (options.minPrice) query.price.$gte = options.minPrice;
-    if (options.maxPrice) query.price.$lte = options.maxPrice;
+    if (options.minPrice) {
+      query.price.$gte = options.minPrice;
+      console.log('  + Min Price:', options.minPrice);
+    }
+    if (options.maxPrice) {
+      query.price.$lte = options.maxPrice;
+      console.log('  + Max Price:', options.maxPrice);
+    }
   }
   
   if (options.search) {
@@ -388,19 +423,36 @@ itemSchema.statics.getByFilters = function(filterCriteria, options = {}) {
       { name: { $regex: options.search, $options: 'i' } },
       { description: { $regex: options.search, $options: 'i' } }
     ];
+    console.log('  + Search query:', options.search);
   }
   
   // Build sort object
+  console.log('');
+  console.log('🔀 Building sort criteria...');
   const sort = {};
   if (options.sortBy) {
     sort[options.sortBy] = options.sortOrder || 1;
+    console.log('  Sort by:', options.sortBy, 'Order:', options.sortOrder || 1);
   } else {
     sort.createdAt = -1; // Default sort by creation date
+    console.log('  Default sort: createdAt descending');
   }
   
   // Apply pagination
   const limit = options.limit || 10;
   const skip = options.skip || 0;
+  console.log('');
+  console.log('📄 Pagination:');
+  console.log('  Limit:', limit);
+  console.log('  Skip:', skip);
+  
+  console.log('');
+  console.log('🔍 Final MongoDB Query:');
+  console.log(JSON.stringify(query, null, 2));
+  console.log('');
+  console.log('⏳ Executing query...');
+  console.log('================================================================');
+  console.log('');
   
   return this.find(query)
     .sort(sort)

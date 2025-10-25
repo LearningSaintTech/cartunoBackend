@@ -356,11 +356,18 @@ const createItem = async (req, res) => {
 
 // Get all items with advanced filtering (POST method for complex filters)
 const getAllItems = async (req, res) => {
-  console.log('=== getAllItems called ===');
-  console.log('Request body:', req.body);
-  console.log('Query parameters:', req.query);
+  console.log('');
+  console.log('🔵 ==================== BACKEND: getAllItems (Filter API) ====================');
+  console.log('📥 Request received at:', new Date().toISOString());
+  console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
+  console.log('🔍 Query parameters:', req.query);
+  console.log('');
   
   try {
+    // Extract all possible filter parameters from request body
+    const requestBody = req.body;
+    console.log('📦 Extracting parameters from request body...');
+    
     const { 
       page = 1, 
       limit = 10, 
@@ -372,37 +379,86 @@ const getAllItems = async (req, res) => {
       search,
       categoryId,
       subcategoryId,
-      filters = {} // Extract filters from request body
-    } = req.body;
+      ...otherParams // Capture all other parameters as potential filters
+    } = requestBody;
     
-    console.log('Parsed parameters - page:', page, 'limit:', limit, 'sortBy:', sortBy, 'sortOrder:', sortOrder, 'minPrice:', minPrice, 'maxPrice:', maxPrice, 'hasDiscount:', hasDiscount, 'search:', search, 'categoryId:', categoryId, 'subcategoryId:', subcategoryId);
-    console.log('Filters from body:', filters);
+    console.log('');
+    console.log('📊 Core Parameters:');
+    console.log('  - Page:', page);
+    console.log('  - Limit:', limit);
+    console.log('  - Sort By:', sortBy);
+    console.log('  - Sort Order:', sortOrder);
+    console.log('  - Min Price:', minPrice);
+    console.log('  - Max Price:', maxPrice);
+    console.log('  - Has Discount:', hasDiscount);
+    console.log('  - Search:', search);
+    console.log('  - Category ID:', categoryId);
+    console.log('  - Subcategory ID:', subcategoryId);
+    console.log('');
+    console.log('🎯 Other Parameters (Potential Filters):');
+    console.log(JSON.stringify(otherParams, null, 2));
+    console.log('');
+    
+    // Build filters object from otherParams
+    const filters = {};
+    Object.keys(otherParams).forEach(key => {
+      // Skip pagination and sort parameters
+      if (!['page', 'limit', 'sortBy', 'sortOrder'].includes(key)) {
+        filters[key] = otherParams[key];
+        console.log(`  ➕ Adding filter from params: ${key} =`, otherParams[key]);
+      }
+    });
+    
+    console.log('');
+    console.log('🔧 Constructed Filters Object:');
+    console.log(JSON.stringify(filters, null, 2));
+    console.log('');
 
     // Validate filters structure
+    console.log('🔍 Validating filter structure...');
     if (filters && typeof filters === 'object') {
+      const filterKeys = Object.keys(filters);
+      console.log('  Filter keys to validate:', filterKeys);
+      
       for (const [key, values] of Object.entries(filters)) {
-        if (!Array.isArray(values) || values.length === 0) {
-          console.log('Validation failed: Filter values must be an array');
+        console.log(`  Validating filter "${key}":`, values);
+        
+        if (!Array.isArray(values)) {
+          console.log(`    ❌ VALIDATION FAILED: "${key}" is not an array, type:`, typeof values);
+          return res.status(400).json(
+            apiResponse(400, false, `Filter values for '${key}' must be an array`)
+          );
+        }
+        
+        if (values.length === 0) {
+          console.log(`    ❌ VALIDATION FAILED: "${key}" is an empty array`);
           return res.status(400).json(
             apiResponse(400, false, `Filter values for '${key}' must be a non-empty array`)
           );
         }
         
+        console.log(`    ✅ ${key} is valid array with ${values.length} values`);
+        
         // Validate each filter value
-        for (const value of values) {
+        for (let i = 0; i < values.length; i++) {
+          const value = values[i];
           if (typeof value !== 'string' || value.trim().length === 0) {
-            console.log('Validation failed: Invalid filter value');
+            console.log(`    ❌ VALIDATION FAILED: Invalid value at index ${i}:`, value, 'type:', typeof value);
             return res.status(400).json(
-              apiResponse(400, false, `Invalid filter value for '${key}': ${value}`)
+              apiResponse(400, false, `Invalid filter value for '${key}' at index ${i}: ${value}`)
             );
           }
+          console.log(`      ✓ Value ${i}: "${value}" (valid)`);
         }
       }
     }
 
-    console.log('Filter validation passed');
+    console.log('');
+    console.log('✅ Filter validation passed');
+    console.log('');
 
     // Build query options
+    console.log('🏗️ Building query options...');
     const queryOptions = {
       categoryId: categoryId || undefined,
       subcategoryId: subcategoryId || undefined,
@@ -415,17 +471,39 @@ const getAllItems = async (req, res) => {
       skip: (parseInt(page) - 1) * parseInt(limit)
     };
 
-    console.log('Query options:', queryOptions);
+    console.log('');
+    console.log('⚙️ Final Query Options:');
+    console.log(JSON.stringify(queryOptions, null, 2));
+    console.log('');
+    console.log('🔍 Calling Item.getByFilters() with:');
+    console.log('  Filters:', JSON.stringify(filters, null, 2));
+    console.log('  Options:', JSON.stringify(queryOptions, null, 2));
+    console.log('');
 
     // Use the new getByFilters method
     const items = await Item.getByFilters(filters, queryOptions);
-    console.log('Retrieved items count:', items.length);
+    
+    console.log('');
+    console.log('📤 Query Results:');
+    console.log('  Items count:', items.length);
+    if (items.length > 0) {
+      console.log('  First item:', {
+        id: items[0]._id,
+        name: items[0].name,
+        price: items[0].price,
+        categoryId: items[0].categoryId,
+        filters: items[0].filters?.map(f => `${f.key}: ${f.values.join(',')}`)
+      });
+    }
+    console.log('');
 
     // Get total count for pagination
+    console.log('🔢 Building count query for pagination...');
     const totalQuery = {};
     
     // Apply filter criteria to count query
     if (Object.keys(filters).length > 0) {
+      console.log('  Adding filter criteria to count query...');
       const filterQueries = [];
       Object.entries(filters).forEach(([key, values]) => {
         if (values && values.length > 0) {
@@ -434,55 +512,104 @@ const getAllItems = async (req, res) => {
             'filters.key': key,
             'filters.values': { $in: valueArray }
           };
+          console.log(`    Adding filter query for "${key}":`, filterQuery);
           filterQueries.push(filterQuery);
         }
       });
       if (filterQueries.length > 0) {
         totalQuery.$and = filterQueries;
+        console.log('  ✅ Filter queries added to count query');
       }
+    } else {
+      console.log('  ⚠️ No filters to add to count query');
     }
 
     // Apply other filters to count query
-    if (categoryId) totalQuery.categoryId = categoryId;
-    if (subcategoryId) totalQuery.subcategoryId = subcategoryId;
+    console.log('  Adding other criteria to count query...');
+    if (categoryId) {
+      totalQuery.categoryId = categoryId;
+      console.log('    + Category ID:', categoryId);
+    }
+    if (subcategoryId) {
+      totalQuery.subcategoryId = subcategoryId;
+      console.log('    + Subcategory ID:', subcategoryId);
+    }
     if (minPrice || maxPrice) {
       totalQuery.price = {};
-      if (minPrice) totalQuery.price.$gte = parseFloat(minPrice);
-      if (maxPrice) totalQuery.price.$lte = parseFloat(maxPrice);
+      if (minPrice) {
+        totalQuery.price.$gte = parseFloat(minPrice);
+        console.log('    + Min Price:', minPrice);
+      }
+      if (maxPrice) {
+        totalQuery.price.$lte = parseFloat(maxPrice);
+        console.log('    + Max Price:', maxPrice);
+      }
     }
     if (search) {
       totalQuery.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
+      console.log('    + Search:', search);
     }
     if (hasDiscount === true) {
       totalQuery.$or = [
         { discountPrice: { $gt: 0 } },
         { discountPercentage: { $gt: 0 } }
       ];
+      console.log('    + Has Discount: true');
     }
 
+    console.log('');
+    console.log('📊 Final Count Query:');
+    console.log(JSON.stringify(totalQuery, null, 2));
+    console.log('');
+    console.log('🔢 Executing count query...');
     const total = await Item.countDocuments(totalQuery);
-    console.log('Total items count:', total);
+    console.log('  ✅ Total items matching query:', total);
+    console.log('');
+
+    console.log('📤 ==================== SENDING RESPONSE ====================');
+    const responseData = {
+      items,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        itemsPerPage: parseInt(limit)
+      },
+      filters: filters
+    };
+    
+    console.log('Response summary:');
+    console.log('  - Items returned:', items.length);
+    console.log('  - Total items:', total);
+    console.log('  - Current page:', parseInt(page));
+    console.log('  - Total pages:', Math.ceil(total / parseInt(limit)));
+    console.log('  - Filters applied:', Object.keys(filters).length);
+    if (Object.keys(filters).length > 0) {
+      console.log('  - Filter details:');
+      Object.entries(filters).forEach(([key, values]) => {
+        console.log(`      ${key}:`, values);
+      });
+    }
+    console.log('================================================================');
+    console.log('');
 
     res.status(200).json(
-      apiResponse(200, true, 'Items retrieved successfully', {
-        items,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / parseInt(limit)),
-          totalItems: total,
-          itemsPerPage: parseInt(limit)
-        },
-        filters: filters
-      })
+      apiResponse(200, true, 'Items retrieved successfully', responseData)
     );
 
   } catch (error) {
-    console.error('Get items error:', error);
+    console.log('');
+    console.log('❌ ==================== BACKEND ERROR ====================');
+    console.error('Error Type:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    console.log('=========================================================');
+    console.log('');
     res.status(500).json(
-      apiResponse(500, false, 'Failed to retrieve items')
+      apiResponse(500, false, 'Failed to retrieve items', { error: error.message })
     );
   }
 };
