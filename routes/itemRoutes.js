@@ -24,7 +24,8 @@ const {
   removeItemFilter,
   getItemsByFilter,
   getBestSellers,
-  getNewArrivals
+  getNewArrivals,
+  getRandomizedItems
 } = require('../controllers/itemController');
 const { verifyAuth } = require('../middleware/auth');
 
@@ -91,6 +92,7 @@ router.get('/price-range', getItemsByPriceRange);
 router.get('/discounted', getDiscountedItems);
 router.get('/best-sellers', getBestSellers); // Get best selling items
 router.get('/new-arrivals', getNewArrivals); // Get new arrival items
+router.get('/randomized', getRandomizedItems); // Get randomized items for homepage
 router.get('/filters/available', getAvailableFilters); // Get available filter options
 router.get('/filter/:filterKey/:filterValue', getItemsByFilter); // Get items by specific filter
 router.get('/:id', getItemById);

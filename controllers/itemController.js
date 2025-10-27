@@ -2346,6 +2346,149 @@ const getNewArrivals = async (req, res) => {
   }
 };
 
+// Get randomized items for homepage
+const getRandomizedItems = async (req, res) => {
+  console.log('=== getRandomizedItems called ===');
+  console.log('Request query:', req.query);
+  
+  try {
+    const { limit = 12, categoryId, subcategoryId } = req.query;
+    
+    console.log('Parameters:', { limit, categoryId, subcategoryId });
+    
+    // Build base query
+    const query = {};
+    
+    // Add category filter if provided
+    if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+      query.categoryId = new mongoose.Types.ObjectId(categoryId);
+    }
+    
+    // Add subcategory filter if provided
+    if (subcategoryId && mongoose.Types.ObjectId.isValid(subcategoryId)) {
+      query.subcategoryId = new mongoose.Types.ObjectId(subcategoryId);
+    }
+    
+    console.log('Query:', query);
+    
+    // Get total count for randomization
+    const totalCount = await Item.countDocuments(query);
+    console.log('Total items found:', totalCount);
+    
+    if (totalCount === 0) {
+      return res.json(apiResponse(200, true, 'No items found', {
+        items: [],
+        totalCount: 0,
+        limit: parseInt(limit)
+      }));
+    }
+    
+    // Calculate how many items to fetch (fetch more than needed for better randomization)
+    const fetchLimit = Math.min(totalCount, parseInt(limit) * 2);
+    
+    // Fetch items with randomization using aggregation pipeline
+    const randomizedItems = await Item.aggregate([
+      { $match: query },
+      { $sample: { size: fetchLimit } },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'category'
+        }
+      },
+      {
+        $lookup: {
+          from: 'subcategories',
+          localField: 'subcategoryId',
+          foreignField: '_id',
+          as: 'subcategory'
+        }
+      },
+      {
+        $addFields: {
+          categoryName: { $arrayElemAt: ['$category.name', 0] },
+          subcategoryName: { $arrayElemAt: ['$subcategory.name', 0] },
+          finalPrice: {
+            $cond: {
+              if: { $gt: ['$discountPrice', 0] },
+              then: '$discountPrice',
+              else: {
+                $cond: {
+                  if: { $gt: ['$discountPercentage', 0] },
+                  then: { $multiply: ['$price', { $subtract: [1, { $divide: ['$discountPercentage', 100] }] }] },
+                  else: '$price'
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          shortDescription: 1,
+          price: 1,
+          discountPrice: 1,
+          discountPercentage: 1,
+          finalPrice: 1,
+          thumbnailImage: 1,
+          categoryId: 1,
+          subcategoryId: 1,
+          categoryName: 1,
+          subcategoryName: 1,
+          variants: 1,
+          filters: 1,
+          keyHighlights: 1,
+          isActive: 1,
+          createdAt: 1,
+          updatedAt: 1
+        }
+      },
+      { $limit: parseInt(limit) }
+    ]);
+    
+    console.log('Randomized items fetched:', randomizedItems.length);
+    
+    // Transform the data to match frontend expectations
+    const transformedItems = randomizedItems.map(item => ({
+      _id: item._id,
+      name: item.name,
+      description: item.description,
+      shortDescription: item.shortDescription,
+      price: item.price,
+      discountPrice: item.discountPrice,
+      discountPercentage: item.discountPercentage,
+      finalPrice: item.finalPrice,
+      thumbnailImage: item.thumbnailImage,
+      categoryId: item.categoryId,
+      subcategoryId: item.subcategoryId,
+      categoryName: item.categoryName,
+      subcategoryName: item.subcategoryName,
+      variants: item.variants,
+      filters: item.filters,
+      keyHighlights: item.keyHighlights,
+      isActive: item.isActive,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    }));
+    
+    res.json(apiResponse(200, true, 'Randomized items fetched successfully', {
+      items: transformedItems,
+      totalCount: totalCount,
+      limit: parseInt(limit),
+      fetched: transformedItems.length
+    }));
+    
+  } catch (error) {
+    console.error('Error fetching randomized items:', error);
+    res.status(500).json(apiResponse(500, false, 'Failed to fetch randomized items', error.message));
+  }
+};
+
 module.exports = {
   createItem,
   getAllItems,
@@ -2369,5 +2512,6 @@ module.exports = {
   removeItemFilter,
   getItemsByFilter,
   getBestSellers,
-  getNewArrivals
+  getNewArrivals,
+  getRandomizedItems
 };
