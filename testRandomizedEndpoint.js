@@ -5,7 +5,7 @@ async function testRandomizedItemsEndpoint() {
   console.log('🧪 Testing Randomized Items API Endpoint');
   console.log('='.repeat(50));
 
-  const baseURL = 'http://localhost:5000/api';
+  const baseURL = 'http://localhost:5000/api/api';
   
   try {
     // Test 1: Basic request

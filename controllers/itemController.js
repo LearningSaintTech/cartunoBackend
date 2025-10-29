@@ -408,6 +408,51 @@ const getAllItems = async (req, res) => {
         console.log(`  ➕ Adding filter from params: ${key} =`, otherParams[key]);
       }
     });
+
+    // Translate price-range filter to numeric minPrice/maxPrice so it actually filters items
+    // Supports keys like 'price-range' or category-specific 'price-range-<slug>'
+    const priceRangeKey = Object.keys(filters).find(k => k === 'price-range' || k.startsWith('price-range-'));
+    let derivedMinPrice = minPrice ? parseFloat(minPrice) : undefined;
+    let derivedMaxPrice = maxPrice ? parseFloat(maxPrice) : undefined;
+
+    if (priceRangeKey) {
+      try {
+        const rangeValues = Array.isArray(filters[priceRangeKey]) ? filters[priceRangeKey] : [filters[priceRangeKey]];
+        // Define ranges consistent with generator
+        const RANGE_MAP = {
+          'budget': { min: 0, max: 1000 },
+          'mid-range': { min: 1000, max: 5000 },
+          'premium': { min: 5000, max: 15000 },
+          'luxury': { min: 15000, max: 50000 },
+          'ultra-luxury': { min: 50000, max: Number.POSITIVE_INFINITY }
+        };
+
+        // Combine multiple selected ranges into a single numeric window by spanning full coverage
+        let minCandidates = [];
+        let maxCandidates = [];
+        rangeValues.forEach(v => {
+          const key = String(v).toLowerCase();
+          if (RANGE_MAP[key]) {
+            minCandidates.push(RANGE_MAP[key].min);
+            maxCandidates.push(RANGE_MAP[key].max);
+          }
+        });
+
+        if (minCandidates.length > 0) {
+          const computedMin = Math.min(...minCandidates);
+          const computedMax = Math.max(...maxCandidates);
+          // Apply only if not already explicitly provided
+          if (derivedMinPrice === undefined) derivedMinPrice = computedMin;
+          if (derivedMaxPrice === undefined && Number.isFinite(computedMax)) derivedMaxPrice = computedMax;
+        }
+
+        // Remove price-range key so it doesn't try to match against Item.filters
+        delete filters[priceRangeKey];
+        console.log('  🔁 Translated price-range to numeric bounds:', { derivedMinPrice, derivedMaxPrice });
+      } catch (e) {
+        console.log('  ⚠️ Failed to translate price-range filter:', e.message);
+      }
+    }
     
     console.log('');
     console.log('🔧 Constructed Filters Object:');
@@ -462,8 +507,8 @@ const getAllItems = async (req, res) => {
     const queryOptions = {
       categoryId: categoryId || undefined,
       subcategoryId: subcategoryId || undefined,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      minPrice: derivedMinPrice,
+      maxPrice: derivedMaxPrice,
       search: search || undefined,
       sortBy: sortBy,
       sortOrder: parseInt(sortOrder),
@@ -534,15 +579,15 @@ const getAllItems = async (req, res) => {
       totalQuery.subcategoryId = subcategoryId;
       console.log('    + Subcategory ID:', subcategoryId);
     }
-    if (minPrice || maxPrice) {
+    if (derivedMinPrice !== undefined || derivedMaxPrice !== undefined) {
       totalQuery.price = {};
-      if (minPrice) {
-        totalQuery.price.$gte = parseFloat(minPrice);
-        console.log('    + Min Price:', minPrice);
+      if (derivedMinPrice !== undefined) {
+        totalQuery.price.$gte = derivedMinPrice;
+        console.log('    + Min Price:', derivedMinPrice);
       }
-      if (maxPrice) {
-        totalQuery.price.$lte = parseFloat(maxPrice);
-        console.log('    + Max Price:', maxPrice);
+      if (derivedMaxPrice !== undefined) {
+        totalQuery.price.$lte = derivedMaxPrice;
+        console.log('    + Max Price:', derivedMaxPrice);
       }
     }
     if (search) {
