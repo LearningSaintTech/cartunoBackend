@@ -411,6 +411,47 @@ const getActiveByCategory = async (req, res) => {
   }
 };
 
+// Get all subcategories by category (for admin - includes inactive)
+const getSubcategoriesByCategory = async (req, res) => {
+  console.log('=== getSubcategoriesByCategory called ===');
+  console.log('Category ID:', req.params.categoryId);
+  
+  try {
+    const { categoryId } = req.params;
+
+    // Check if category exists
+    const categoryExists = await Category.findById(categoryId);
+    if (!categoryExists) {
+      console.log('Category not found:', categoryId);
+      return res.status(404).json(
+        apiResponse(404, false, 'Category not found')
+      );
+    }
+
+    console.log('Category found:', categoryExists._id);
+
+    // Get ALL subcategories (active and inactive) for this category
+    const subCategories = await SubCategory.find({ category: categoryId })
+      .populate('category', 'name description image')
+      .sort({ sortOrder: 1, name: 1 });
+    
+    console.log('Retrieved all subcategories count:', subCategories.length);
+
+    res.status(200).json(
+      apiResponse(200, true, 'Subcategories retrieved successfully', {
+        subcategories: subCategories,
+        total: subCategories.length
+      })
+    );
+
+  } catch (error) {
+    console.error('Get subcategories by category error:', error);
+    res.status(500).json(
+      apiResponse(500, false, 'Failed to retrieve subcategories')
+    );
+  }
+};
+
 // Get all subcategories with category details
 const getAllWithCategory = async (req, res) => {
   console.log('=== getAllWithCategory called ===');
@@ -507,6 +548,7 @@ module.exports = {
   deleteSubCategory,
   toggleSubCategoryStatus,
   getActiveByCategory,
+  getSubcategoriesByCategory,
   getAllWithCategory,
   searchSubCategories
 };

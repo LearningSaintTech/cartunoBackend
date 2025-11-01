@@ -9,6 +9,7 @@ const {
   deleteSubCategory,
   toggleSubCategoryStatus,
   getActiveByCategory,
+  getSubcategoriesByCategory,
   getAllWithCategory,
   searchSubCategories
 } = require('../controllers/subCategoryController');
@@ -39,9 +40,11 @@ router.get('/search', searchSubCategories);
 // Protected routes (admin authentication required)
 router.post('/', verifyAuth(['admin']), upload.single('image'), createSubCategory);
 router.get('/', verifyAuth(['admin']), getAllSubCategories);
+// IMPORTANT: Specific routes must come before generic /:id routes
+router.get('/category/:categoryId', verifyAuth(['admin']), getSubcategoriesByCategory);
+router.patch('/:id/toggle-status', verifyAuth(['admin']), toggleSubCategoryStatus);
 router.get('/:id', verifyAuth(['admin']), getSubCategoryById);
 router.put('/:id', verifyAuth(['admin']), upload.single('image'), updateSubCategory);
 router.delete('/:id', verifyAuth(['admin']), deleteSubCategory);
-router.patch('/:id/toggle-status', verifyAuth(['admin']), toggleSubCategoryStatus);
 
 module.exports = router;
